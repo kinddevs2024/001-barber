@@ -1,0 +1,437 @@
+import { useState, useEffect } from 'react'
+import { MapPinIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { motion } from 'framer-motion'
+import { Button } from '@material-tailwind/react'
+import { servicesData, pricingData, whyChooseUs, contactInfo } from '../data'
+import { imagePool, getImagesInOrder } from '../data/images'
+import { API_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL } from '../data/api'
+import ServiceCard from '../components/ServiceCard'
+import ContactForm from '../components/ContactForm'
+import RegisterModal from '../components/RegisterModal'
+import Footer from '../components/Footer'
+
+function Home() {
+  const [registerModalOpen, setRegisterModalOpen] = useState(false)
+  const [services, setServices] = useState([])
+  const [loadingServices, setLoadingServices] = useState(true)
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoadingServices(true)
+        console.log('Fetching services from:', `${SERVICES_BASE_URL}${API_ENDPOINTS.services}`)
+        
+        const response = await fetch(`${SERVICES_BASE_URL}${API_ENDPOINTS.services}`, {
+          method: 'GET',
+          headers: {
+            'Accept': '*/*',
+            'Content-Type': 'application/json'
+          },
+          mode: 'cors'
+        })
+        
+        console.log('Services response status:', response.status, response.statusText)
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Services fetch error:', errorText)
+          throw new Error(`Failed to fetch services: ${response.status} ${response.statusText}`)
+        }
+        
+        const data = await response.json()
+        console.log('Services data received:', data)
+        // Handle both array response and object with data property
+        const servicesList = Array.isArray(data) ? data : (data.data || data.services || [])
+        
+        // Map API response to expected format with icon mapping
+        const mappedServices = servicesList.map((service, index) => {
+          // Map service name to icon type (handles both English and Uzbek)
+          const getIconType = (name) => {
+            const nameLower = (name || '').toLowerCase()
+            // English keywords
+            if (nameLower.includes('haircut') || nameLower.includes('hair cut') || nameLower.includes('hair') || nameLower.includes('soch')) {
+              return 'scissors'
+            } else if (nameLower.includes('beard') || nameLower.includes('soqol') || nameLower.includes('facial') || nameLower.includes('yuz')) {
+              return 'beard'
+            } else if (nameLower.includes('shave') || nameLower.includes('razor') || nameLower.includes('qirqish')) {
+              return 'razor'
+            } else if (nameLower.includes('kid') || nameLower.includes('child') || nameLower.includes('bola')) {
+              return 'kid'
+            }
+            return 'scissors' // default
+          }
+
+          // Format price for display
+          const formatPrice = (price) => {
+            if (!price) return 'N/A'
+            const numPrice = parseFloat(price)
+            if (isNaN(numPrice)) return price
+            // Format as currency (UZS)
+            return new Intl.NumberFormat('uz-UZ', {
+              style: 'currency',
+              currency: 'UZS',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0
+            }).format(numPrice)
+          }
+
+          return {
+            id: service.id || service._id || index + 1,
+            name: service.name || service.title || 'Service',
+            icon: service.icon || getIconType(service.name || service.title),
+            description: service.description || service.desc || service.about || `${service.duration ? `${service.duration} min` : 'Professional service'}`,
+            price: service.price ? formatPrice(service.price) : null,
+            duration: service.duration || null,
+            originalPrice: service.price || null
+          }
+        })
+        
+        setServices(mappedServices.length > 0 ? mappedServices : servicesData)
+      } catch (err) {
+        console.error('Error fetching services:', err)
+        console.error('Error details:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        })
+        // Fallback to static data on error
+        setServices(servicesData)
+      } finally {
+        setLoadingServices(false)
+      }
+    }
+
+    fetchServices()
+  }, [])
+
+  // Use API services if available, otherwise fallback to static data
+  const displayServices = services.length > 0 ? services : servicesData
+  const homeServices = displayServices.slice(0, 4)
+  const homePricing = pricingData.slice(0, 8)
+
+  const handleRegisterModal = () => {
+    setRegisterModalOpen(!registerModalOpen)
+  }
+
+  return (
+    <div>
+      {/* Hero Section - Full Page */}
+      <section className="w-full h-screen relative overflow-hidden bg-white">
+        {/* Content Container */}
+        <div className="relative z-10 h-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[126px] flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          {/* Image - First on Mobile, Right on Desktop */}
+          <div className="flex-1 w-full lg:w-auto lg:max-w-[680px] flex items-center justify-center order-1 lg:order-2" data-aos="fade-left">
+            <div className="relative w-full h-[300px] xs:h-[650px] sm:h-[400px] md:h-[500px] lg:h-[800px] xl:h-[900px] 2xl:h-[1000px] rounded-2xl sm:rounded-3xl lg:rounded-[35px] overflow-hidden shadow-2xl">
+              <img 
+                src="/5273736187975765549_121.jpg" 
+                alt="001 Barbershop - Professional haircut and grooming services in Tashkent" 
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            </div>
+          </div>
+          
+          {/* Content - Second on Mobile, Left on Desktop */}
+          <div className="flex-1 flex flex-col justify-center lg:justify-start lg:pt-[100px] z-10 w-full lg:w-auto order-2 lg:order-1" data-aos="fade-right">
+                  <div className="text-xs sm:text-sm font-semibold text-black mb-3 sm:mb-4 tracking-wider">XUSH KELIBSIZ</div>
+                  <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-black mb-2 sm:mb-3 md:mb-4 leading-tight">
+                    {contactInfo.tagline}
+                  </h1>
+                  <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-black mb-2 sm:mb-3 opacity-90">
+                    {contactInfo.description}
+                  </p>
+                  <p className="text-sm xs:text-base sm:text-lg md:text-xl text-black mb-4 sm:mb-6 md:mb-8 opacity-80">
+                    {contactInfo.subtitle}
+                  </p>
+            <div className="space-y-2 sm:space-y-3 md:space-y-4 mb-6 sm:mb-8 md:mb-10">
+              <div className="flex items-center gap-2 sm:gap-3 text-black text-sm sm:text-base md:text-lg">
+                <MapPinIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" aria-hidden="true" />
+                <span className="break-words">{contactInfo.address}</span>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 text-black text-sm sm:text-base md:text-lg">
+                <PhoneIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" aria-hidden="true" />
+                <a href={`tel:${contactInfo.phone}`} className="hover:text-barber-gold transition-colors break-all">{contactInfo.phone}</a>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 text-black text-sm sm:text-base md:text-lg">
+                <EnvelopeIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" aria-hidden="true" />
+                <a href={`mailto:${contactInfo.email}`} className="hover:text-barber-gold transition-colors break-all">{contactInfo.email}</a>
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <Button
+                size="lg"
+                variant="outlined"
+                onClick={handleRegisterModal}
+                className="px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base md:text-lg text-black hover:bg-gray-50"
+                aria-label="Book an appointment online"
+              >
+                Onlayn bron qilish
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce hidden lg:block">
+          <div className="w-6 h-10 border-2 border-black rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-black rounded-full mt-2"></div>
+          </div>
+        </div>
+      </section>
+
+      <div>
+      {/* Services Overview Section */}
+      <section className="w-full bg-white py-8 sm:py-10 md:py-12 lg:py-16" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
+          {loadingServices && (
+            <div className="text-center py-8">
+              <p className="text-black text-lg">Xizmatlar yuklanmoqda...</p>
+            </div>
+          )}
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+            {homeServices.map((service, i) => (
+              <ServiceCard key={service.id} service={service} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us & Working Hours Section */}
+      <section className="w-full bg-barber-dark py-8 sm:py-10 md:py-12 lg:py-20 relative" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px] grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
+          <div className="text-white relative z-10" data-aos="fade-right">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Nima uchun bizni tanlashadi?</h2>
+                    <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 opacity-90">
+                      Qo'shimcha ravishda, ko'plab odamlar Toshkentda {contactInfo.tagline} ni afzal ko'rishining yana 5 ta sababi bor...
+                    </p>
+            <ul className="space-y-2 sm:space-y-3 list-disc list-inside text-sm sm:text-base">
+              {whyChooseUs.map((reason, i) => (
+                <li key={i}>{reason}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 relative z-10" data-aos="fade-left">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-black mb-4 sm:mb-6">ISH VAQTI</h2>
+            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 md:mb-8">
+              {contactInfo.workingHours.map((schedule, i) => (
+                <div key={i} className="text-black font-medium text-sm sm:text-base">{schedule.day} {schedule.hours}</div>
+              ))}
+            </div>
+            <Button
+              size="lg"
+              variant="outlined"
+              onClick={handleRegisterModal}
+              className="w-full px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base text-black hover:bg-gray-50"
+              aria-label="Book an appointment online"
+            >
+              Book Online
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Pricing Section */}
+      <section className="w-full bg-white py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-6 sm:mb-8 md:mb-12">Narxlar</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-4xl mx-auto">
+            <div className="space-y-3 sm:space-y-4 md:space-y-6">
+              {homePricing.slice(0, 4).map((item, i) => (
+                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
+                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                  <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3 sm:space-y-4 md:space-y-6">
+              {homePricing.slice(4, 8).map((item, i) => (
+                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
+                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                  <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Welcome to the Upscale Barber Studio Section */}
+      <section className="w-full bg-barber-dark py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px] grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+          <div className="relative order-2 lg:order-1" data-aos="fade-right">
+            <div className="w-full h-[300px] xs:h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl relative overflow-hidden">
+              <img 
+                src="/5273736187975765548_121.jpg" 
+                alt="Professional barber services at 001 Barbershop" 
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {/* Decorative shapes */}
+              <div className="absolute -top-8 -left-8 sm:-top-10 sm:-left-10 w-32 h-32 sm:w-40 sm:h-40 bg-barber-gold rounded-full opacity-50"></div>
+              <div className="absolute -bottom-8 -right-8 sm:-bottom-10 sm:-right-10 w-24 h-24 sm:w-32 sm:h-32 bg-teal-400 rounded-full opacity-50"></div>
+            </div>
+          </div>
+          <div className="bg-barber-light rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 lg:p-12 order-1 lg:order-2" data-aos="fade-left">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-3 sm:mb-4 md:mb-6">Yuqori darajadagi barbershop studiyasiga xush kelibsiz</h2>
+            <p className="text-black mb-4 sm:mb-6 md:mb-8 leading-relaxed text-sm sm:text-base">
+              Bizning barbershopimizda siz professional xizmat va qulay muhitni topasiz. Bizning mutaxassislarimiz har bir mijozga individual yondashuv bilan yuqori sifatli xizmat ko'rsatishadi.
+            </p>
+            <Button
+              size="lg"
+              onClick={handleRegisterModal}
+              className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-black text-white rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base hover:bg-gray-800"
+              aria-label="Book an appointment online"
+            >
+              Book Online
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Free Consultation Section */}
+      <section className="w-full bg-white py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px] grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+          <div className="order-2 lg:order-1" data-aos="fade-right">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 sm:mb-6 md:mb-8 leading-tight">
+              BEPUL individual maslahat olish uchun bizning mutaxassis barberlarimiz bilan bog'laning
+            </h2>
+            <Button
+              size="lg"
+              variant="outlined"
+              className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base text-black hover:bg-gray-50"
+              aria-label="Book an appointment online"
+            >
+              Book Online
+            </Button>
+          </div>
+          <div className="relative order-1 lg:order-2" data-aos="fade-left">
+            <div className="w-full h-[300px] xs:h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl relative overflow-hidden">
+              <img 
+                src="/5273736187975765550_121.jpg" 
+                alt="Expert barbers at 001 Barbershop providing consultation" 
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {/* Decorative shapes */}
+              <div className="absolute -top-8 -left-8 sm:-top-10 sm:-left-10 w-32 h-32 sm:w-40 sm:h-40 bg-barber-gold rounded-full opacity-50"></div>
+              <div className="absolute -bottom-8 -right-8 sm:-bottom-10 sm:-right-10 w-24 h-24 sm:w-32 sm:h-32 bg-teal-400 rounded-full opacity-50"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Barbershop Services Section */}
+      <section className="w-full bg-barber-dark py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mb-6 sm:mb-8 md:mb-12">Barbershop Xizmatlari</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+            <div className="w-full h-[300px] xs:h-[450px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] rounded-2xl sm:rounded-3xl overflow-hidden" data-aos="fade-right">
+              <img 
+                src="/5273736187975765549_121.jpg" 
+                alt="Barbershop services at 001 Barbershop" 
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6" data-aos="fade-left">
+              {displayServices.slice(4, 8).map((service, i) => (
+                <motion.div
+                  key={service.id}
+                  className="bg-barber-light rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 flex flex-col items-center gap-3 sm:gap-4"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center">
+                    <svg width="50" height="50" viewBox="0 0 50 50" fill="none" className="text-barber-gold w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" aria-hidden="true">
+                      <path d="M25 5L10 15v10l15 10 15-10V15L25 5z" stroke="currentColor" strokeWidth="2" fill="none"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-barber-gold text-center">{service.name}</h3>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Experience the Best Haircut & Shave Services Section */}
+      <section className="w-full bg-barber-olive py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mb-6 sm:mb-8 md:mb-12">Eng Yaxshi Soch Olish va Qirqish Xizmatlarini Boshdan Kechiring</h2>
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+            {getImagesInOrder(6).map((imgSrc, i) => (
+              <motion.div
+                key={i}
+                className="w-full h-[200px] xs:h-[220px] sm:h-[250px] md:h-[280px] lg:h-[300px] rounded-2xl sm:rounded-3xl overflow-hidden"
+                data-aos="zoom-in"
+                data-aos-delay={i * 100}
+                whileHover={{ scale: 1.05 }}
+              >
+                <img 
+                  src={imgSrc} 
+                  alt={`001 Barbershop service example ${i + 1}`} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* People Comments Section */}
+      <section className="w-full bg-barber-olive py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mb-6 sm:mb-8 md:mb-12">Mijozlar Fikrlari</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+            {contactInfo.testimonials.map((comment, i) => (
+              <motion.div
+                key={i}
+                className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 relative"
+                data-aos="fade-up"
+                data-aos-delay={i * 200}
+                whileHover={{ y: -5 }}
+              >
+                <svg className="absolute top-4 sm:top-5 md:top-6 left-4 sm:left-5 md:left-6 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-barber-gold" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+                  <path d="M6 20h8l-2-8H8c-1.1 0-2 .9-2 2v6zm12 0h8l-2-8h-4c-1.1 0-2 .9-2 2v6z" fill="currentColor"/>
+                </svg>
+                <div className="flex items-center gap-3 sm:gap-4 mt-5 sm:mt-6 md:mt-8 mb-3 sm:mb-4">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-barber-gold rounded-full flex-shrink-0"></div>
+                  <h3 className="text-lg sm:text-xl font-bold text-black">{comment.name}</h3>
+                </div>
+                <p className="text-black text-sm sm:text-base">{comment.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Us! Section */}
+      <section className="w-full bg-barber-dark py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px] grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
+          <div className="w-full h-[300px] xs:h-[450px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] rounded-2xl sm:rounded-3xl overflow-hidden order-2 lg:order-1" data-aos="fade-right">
+            <img 
+              src="/5273736187975765548_121.jpg" 
+              alt="Contact 001 Barbershop in Tashkent" 
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div className="flex flex-col justify-center order-1 lg:order-2" data-aos="fade-left">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 md:mb-8">Biz bilan bog'laning!</h2>
+            <ContactForm />
+          </div>
+        </div>
+      </section>
+
+      </div>
+      
+      <Footer />
+      
+      {/* Register Modal */}
+      <RegisterModal open={registerModalOpen} handleOpen={handleRegisterModal} />
+    </div>
+  )
+}
+
+export default Home
