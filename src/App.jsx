@@ -6,10 +6,9 @@ import Home from './pages/Home'
 import Gallery from './pages/Gallery'
 import Team from './pages/Team'
 import Delivery from './pages/Delivery'
-import Login from './pages/Login'
-import Register from './pages/Register'
 import Booking from './pages/Booking'
 import Admin from './pages/Admin'
+import AdminLogin from './pages/AdminLogin'
 import SuperAdmin from './pages/SuperAdmin'
 import NotFound from './pages/NotFound'
 
@@ -24,16 +23,8 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/team" element={<Team />} />
           <Route path="/delivery" element={<Delivery />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route 
-            path="/booking" 
-            element={
-              <ProtectedRoute>
-                <Booking />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route 
             path="/admin" 
             element={

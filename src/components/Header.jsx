@@ -100,14 +100,14 @@ function Header() {
           >
             Aloqa
           </Link>
-          {isAuthenticated() ? (
+          <Link
+            to="/booking"
+            className={`text-sm lg:text-base font-medium transition-colors ${isActive('/booking') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+          >
+            Bron qilish
+          </Link>
+          {isAuthenticated() && (
             <>
-              <Link
-                to="/booking"
-                className={`text-sm lg:text-base font-medium transition-colors ${isActive('/booking') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-              >
-                Bron qilish
-              </Link>
               {isAdmin() && !isSuperAdmin() && (
                 <Link
                   to="/admin"
@@ -143,13 +143,6 @@ function Header() {
                 Chiqish
               </Button>
             </>
-          ) : (
-            <Link
-              to="/login"
-              className={`text-sm lg:text-base font-medium transition-colors ${isActive('/login') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-            >
-              Kirish
-            </Link>
           )}
         </nav>
 
@@ -213,17 +206,17 @@ function Header() {
               >
                 Aloqa
               </button>
-              {isAuthenticated() ? (
+              <button
+                onClick={() => {
+                  closeMobileMenu()
+                  navigate('/booking')
+                }}
+                className={`text-base font-medium py-2 text-left transition-colors ${isActive('/booking') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+              >
+                Bron qilish
+              </button>
+              {isAuthenticated() && (
                 <>
-                  <button
-                    onClick={() => {
-                      closeMobileMenu()
-                      navigate('/booking')
-                    }}
-                    className={`text-base font-medium py-2 text-left transition-colors ${isActive('/booking') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-                  >
-                    Bron qilish
-                  </button>
                   {isAdmin() && !isSuperAdmin() && (
                     <button
                       onClick={() => {
@@ -268,16 +261,6 @@ function Header() {
                     Chiqish
                   </button>
                 </>
-              ) : (
-                <button
-                  onClick={() => {
-                    closeMobileMenu()
-                    navigate('/login')
-                  }}
-                  className={`text-base font-medium py-2 text-left transition-colors ${isActive('/login') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-                >
-                  Kirish
-                </button>
               )}
             </nav>
           </motion.div>

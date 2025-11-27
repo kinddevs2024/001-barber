@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
 import { barbersData, contactInfo } from '../data'
@@ -9,6 +10,7 @@ import RegisterModal from '../components/RegisterModal'
 import Footer from '../components/Footer'
 
 function Team() {
+  const navigate = useNavigate()
   const [barbers, setBarbers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -60,7 +62,7 @@ function Team() {
             </p>
             <Button
               size="lg"
-              onClick={handleRegisterModal}
+              onClick={() => navigate('/booking')}
               className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-black text-white rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base hover:bg-gray-800"
               aria-label="Book an appointment"
             >
@@ -160,6 +162,7 @@ function Team() {
             <Button
               size="lg"
               variant="filled"
+              onClick={() => navigate('/#narxlar')}
               className="w-full xs:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white text-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base hover:bg-gray-100"
               aria-label="View pricing"
             >
@@ -168,7 +171,7 @@ function Team() {
             <Button
               size="lg"
               variant="outlined"
-              onClick={handleRegisterModal}
+              onClick={() => navigate('/booking')}
               className="w-full xs:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-transparent border-2 border-white text-white rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base hover:bg-white hover:text-black"
               aria-label="Book an appointment online"
             >

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MapPinIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
-import { servicesData, pricingData, whyChooseUs, contactInfo } from '../data'
+import { servicesData, whyChooseUs, contactInfo } from '../data'
 import { imagePool, getImagesInOrder } from '../data/images'
 import { API_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL } from '../data/api'
 import ServiceCard from '../components/ServiceCard'
@@ -11,6 +12,7 @@ import RegisterModal from '../components/RegisterModal'
 import Footer from '../components/Footer'
 
 function Home() {
+  const navigate = useNavigate()
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
   const [services, setServices] = useState([])
   const [loadingServices, setLoadingServices] = useState(true)
@@ -108,7 +110,13 @@ function Home() {
   // Use API services if available, otherwise fallback to static data
   const displayServices = services.length > 0 ? services : servicesData
   const homeServices = displayServices.slice(0, 4)
-  const homePricing = pricingData.slice(0, 8)
+  
+  // Use services from API for pricing (convert to pricing format)
+  const homePricing = displayServices.slice(0, 8).map(service => ({
+    id: service.id,
+    name: service.name,
+    price: service.price || (service.originalPrice ? `${parseFloat(service.originalPrice).toLocaleString('uz-UZ')} UZS` : 'N/A')
+  }))
 
   const handleRegisterModal = () => {
     setRegisterModalOpen(!registerModalOpen)
@@ -162,7 +170,7 @@ function Home() {
               <Button
                 size="lg"
                 variant="outlined"
-                onClick={handleRegisterModal}
+                onClick={() => navigate('/booking')}
                 className="px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base md:text-lg text-black hover:bg-gray-50"
                 aria-label="Book an appointment online"
               >
@@ -221,7 +229,7 @@ function Home() {
             <Button
               size="lg"
               variant="outlined"
-              onClick={handleRegisterModal}
+              onClick={() => navigate('/booking')}
               className="w-full px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base text-black hover:bg-gray-50"
               aria-label="Book an appointment online"
             >
@@ -232,27 +240,38 @@ function Home() {
       </section>
 
       {/* Our Pricing Section */}
-      <section className="w-full bg-white py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
+      <section id="narxlar" className="w-full bg-white py-8 sm:py-10 md:py-12 lg:py-20" data-aos="fade-up">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-6 sm:mb-8 md:mb-12">Narxlar</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-4xl mx-auto">
-            <div className="space-y-3 sm:space-y-4 md:space-y-6">
-              {homePricing.slice(0, 4).map((item, i) => (
-                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
-                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
-                  <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
-                </div>
-              ))}
+          {loadingServices ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-4"></div>
+              <p className="text-black">Narxlar yuklanmoqda...</p>
             </div>
-            <div className="space-y-3 sm:space-y-4 md:space-y-6">
-              {homePricing.slice(4, 8).map((item, i) => (
-                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
-                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
-                  <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
-                </div>
-              ))}
+          ) : homePricing.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Narxlar topilmadi</p>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-4xl mx-auto">
+              <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                {homePricing.slice(0, 4).map((item, i) => (
+                  <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
+                    <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                    <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                {homePricing.slice(4, 8).map((item, i) => (
+                  <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200" data-aos="fade-up" data-aos-delay={i * 50}>
+                    <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                    <span className="text-gray-600 font-semibold text-sm sm:text-base">{item.price}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -279,7 +298,7 @@ function Home() {
             </p>
             <Button
               size="lg"
-              onClick={handleRegisterModal}
+              onClick={() => navigate('/booking')}
               className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-black text-white rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base hover:bg-gray-800"
               aria-label="Book an appointment online"
             >
@@ -299,6 +318,7 @@ function Home() {
             <Button
               size="lg"
               variant="outlined"
+              onClick={() => navigate('/booking')}
               className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white border-2 border-black rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base text-black hover:bg-gray-50"
               aria-label="Book an appointment online"
             >

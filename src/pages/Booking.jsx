@@ -1,36 +1,64 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button, Input } from '@material-tailwind/react'
-import { useAuth } from '../context/AuthContext'
-import { API_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL, BARBERS_BASE_URL, BOOKINGS_BASE_URL } from '../data/api'
-import { apiRequest } from '../utils/api'
+import { BOOKINGS_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL, BARBERS_BASE_URL } from '../data/api'
 import Footer from '../components/Footer'
 
 function Booking() {
-  const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     barber_id: '',
     service_id: '',
     date: '',
-    time: ''
+    time: '',
+    name: '',
+    phone: ''
   })
   const [services, setServices] = useState([])
   const [barbers, setBarbers] = useState([])
-  const [myBookings, setMyBookings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadingBookings, setLoadingBookings] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [selectedBarber, setSelectedBarber] = useState(null)
+  const [useCustomTime, setUseCustomTime] = useState(false)
+  const [customTime, setCustomTime] = useState('')
+  
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0]
+  
+  // Set today's date as default on mount
+  useEffect(() => {
+    if (!formData.date) {
+      setFormData(prev => ({
+        ...prev,
+        date: today
+      }))
+    }
+  }, [])
+
+  // Scroll to top whenever step changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    })
+  }, [currentStep])
+
+  // Generate time slots by hours only (8:00 AM to 9:00 PM)
+  const generateTimeSlotsByHour = () => {
+    const slotsByHour = {}
+    for (let hour = 8; hour <= 21; hour++) {
+      const timeString = `${hour.toString().padStart(2, '0')}:00`
+      slotsByHour[hour] = [timeString]
+    }
+    return slotsByHour
+  }
+
+  const timeSlotsByHour = generateTimeSlotsByHour()
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/login')
-      return
-    }
-
-    // Fetch services and barbers
+    // Fetch services and barbers from API
     const fetchData = async () => {
       try {
         console.log('Fetching services from:', `${SERVICES_BASE_URL}${API_ENDPOINTS.services}`)
@@ -76,13 +104,31 @@ function Booking() {
         console.log('Services data:', servicesData)
         console.log('Barbers data:', barbersData)
 
-        // Handle services response
+        // Handle services response - API returns array directly
         const servicesList = Array.isArray(servicesData) ? servicesData : (servicesData.data || servicesData.services || [])
-        setServices(servicesList)
+        
+        // Map services to include formatted price
+        const mappedServices = servicesList.map((service) => ({
+          ...service,
+          _id: String(service.id),
+          title: service.name,
+          // Format price if it's a number string
+          price: service.price ? `${parseFloat(service.price).toLocaleString('uz-UZ')} UZS` : ''
+        }))
+        
+        setServices(mappedServices)
         
         // Handle barbers response
         const barbersList = Array.isArray(barbersData) ? barbersData : (barbersData.data || barbersData.barbers || [])
-        setBarbers(barbersList)
+        
+        // Map barbers to ensure _id exists
+        const mappedBarbers = barbersList.map((barber) => ({
+          ...barber,
+          _id: String(barber.id || barber._id),
+          fullName: barber.name || barber.fullName || barber.full_name
+        }))
+        
+        setBarbers(mappedBarbers)
       } catch (err) {
         console.error('Error fetching data:', err)
         setError('Failed to load services and barbers')
@@ -92,39 +138,7 @@ function Booking() {
     }
 
     fetchData()
-    fetchMyBookings()
-  }, [navigate, isAuthenticated])
-
-  // Fetch user's bookings
-  const fetchMyBookings = async () => {
-    try {
-      setLoadingBookings(true)
-      console.log('Fetching my bookings from:', `${BOOKINGS_BASE_URL}${API_ENDPOINTS.bookingsMy}`)
-      
-      const response = await apiRequest(API_ENDPOINTS.bookingsMy, {
-        method: 'GET'
-      }, true) // Use bookings base URL
-
-      console.log('My bookings response status:', response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('My bookings fetch error:', errorText)
-        throw new Error(`Failed to fetch bookings: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('My bookings data:', data)
-      
-      const bookingsList = Array.isArray(data) ? data : (data.data || data.bookings || [])
-      setMyBookings(bookingsList)
-    } catch (err) {
-      console.error('Error fetching my bookings:', err)
-      // Don't show error to user, just log it
-    } finally {
-      setLoadingBookings(false)
-    }
-  }
+  }, [])
 
   const handleFormSubmit = async (e) => {
     e.preventDefault()
@@ -133,31 +147,43 @@ function Booking() {
     setSuccess(false)
 
     try {
+      // Match API structure: phone_number, client_name, service_ids (array)
       const bookingData = {
-        client_id: parseInt(user.id || user._id),
+        phone_number: formData.phone,
         barber_id: parseInt(formData.barber_id),
-        service_id: parseInt(formData.service_id),
-        date: formData.date,
-        time: formData.time
+        service_ids: [parseInt(formData.service_id)], // Array as per API
+        date: today, // Always use today's date
+        time: formData.time,
+        client_name: formData.name
       }
 
       console.log('Submitting booking:', bookingData)
-      console.log('User:', user)
 
-      // Use BOOKINGS_BASE_URL (without /api) for bookings endpoint
-      const response = await apiRequest(API_ENDPOINTS.bookings, {
+      const response = await fetch(`${BOOKINGS_BASE_URL}${API_ENDPOINTS.bookings}`, {
         method: 'POST',
-        body: JSON.stringify(bookingData)
-      }, true) // Use bookings base URL
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+        body: JSON.stringify(bookingData),
+        mode: 'cors'
+      })
 
       const data = await response.json()
       console.log('Booking response:', data)
 
       if (response.ok || response.status === 201) {
         setSuccess(true)
-        setFormData({ barber_id: '', service_id: '', date: '', time: '' })
-        // Refresh bookings list after successful booking
-        fetchMyBookings()
+        setFormData({ 
+          barber_id: '', 
+          service_id: '', 
+          date: today, // Reset to today's date
+          time: '', 
+          name: '', 
+          phone: '' 
+        })
+        setSelectedBarber(null)
+        setCurrentStep(1)
         setTimeout(() => {
           setSuccess(false)
         }, 5000)
@@ -168,7 +194,7 @@ function Booking() {
       }
     } catch (err) {
       console.error('Booking error:', err)
-        setError(err.message || 'Tarmoq xatosi. Iltimos, internet aloqangizni tekshiring va qayta urinib ko\'ring.')
+      setError(err.message || 'Tarmoq xatosi. Iltimos, internet aloqangizni tekshiring va qayta urinib ko\'ring.')
     } finally {
       setIsSubmitting(false)
     }
@@ -180,10 +206,102 @@ function Booking() {
       [name]: value
     })
     if (error) setError('')
+
+    // When barber is selected, update selectedBarber state
+    if (name === 'barber_id') {
+      const barber = barbers.find(b => String(b.id || b._id) === value)
+      setSelectedBarber(barber || null)
+    }
+
+    // When time is selected from preset hours, disable custom time
+    if (name === 'time' && !useCustomTime) {
+      setUseCustomTime(false)
+      setCustomTime('')
+    }
   }
 
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0]
+  const handleCustomTimeChange = (value) => {
+    setCustomTime(value)
+    if (value) {
+      // Validate custom time format (HH:MM)
+      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/
+      if (timeRegex.test(value)) {
+        const [hours, minutes] = value.split(':').map(Number)
+        // Check if time is within working hours (8:00 - 21:00)
+        if (hours >= 8 && hours <= 21) {
+          setFormData({
+            ...formData,
+            time: value
+          })
+          setError('')
+        } else {
+          setError('Vaqt 8:00 dan 21:00 gacha bo\'lishi kerak')
+        }
+      } else if (value.length === 5) {
+        setError('Noto\'g\'ri vaqt formati. Iltimos, HH:MM formatida kiriting (masalan: 14:30)')
+      }
+    } else {
+      setFormData({
+        ...formData,
+        time: ''
+      })
+    }
+  }
+
+  const toggleCustomTime = () => {
+    setUseCustomTime(!useCustomTime)
+    if (!useCustomTime) {
+      // Switching to custom time - clear preset time
+      setFormData({
+        ...formData,
+        time: ''
+      })
+      setCustomTime('')
+    } else {
+      // Switching back to preset hours - clear custom time
+      setCustomTime('')
+      setFormData({
+        ...formData,
+        time: ''
+      })
+    }
+    setError('')
+  }
+
+  const handleNext = () => {
+    if (currentStep === 1) {
+      // Validate step 1: barber and time must be selected (date is auto-set to today)
+      if (!formData.barber_id || !formData.time) {
+        setError('Iltimos, barber va vaqtni tanlang')
+        return
+      }
+      setCurrentStep(2)
+    } else if (currentStep === 2) {
+      // Validate step 2: service must be selected
+      if (!formData.service_id) {
+        setError('Iltimos, xizmatni tanlang')
+        return
+      }
+      setCurrentStep(3)
+    }
+    setError('')
+  }
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+      setError('')
+    }
+  }
+
+  // Format date for display
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString + 'T00:00:00')
+    const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
+    const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`
+  }
 
   if (loading) {
     return (
@@ -200,8 +318,40 @@ function Booking() {
     <div className="pt-16 sm:pt-20 md:pt-[92px] min-h-screen bg-white">
       <section className="w-full py-8 sm:py-10 md:py-12 lg:py-16">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[127px]">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-6 text-center">Vaqt belgilash</h1>
+
+            {/* Step Indicator */}
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center space-x-4">
+                <div className={`flex items-center ${currentStep >= 1 ? 'text-barber-olive' : 'text-gray-400'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    currentStep >= 1 ? 'border-barber-olive bg-barber-olive text-white' : 'border-gray-300 bg-white'
+                  }`}>
+                    {currentStep > 1 ? '✓' : '1'}
+                  </div>
+                  <span className="ml-2 text-sm font-medium hidden sm:inline">Barber & Vaqt</span>
+                </div>
+                <div className={`w-12 h-0.5 ${currentStep >= 2 ? 'bg-barber-olive' : 'bg-gray-300'}`}></div>
+                <div className={`flex items-center ${currentStep >= 2 ? 'text-barber-olive' : 'text-gray-400'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    currentStep >= 2 ? 'border-barber-olive bg-barber-olive text-white' : 'border-gray-300 bg-white'
+                  }`}>
+                    {currentStep > 2 ? '✓' : '2'}
+                  </div>
+                  <span className="ml-2 text-sm font-medium hidden sm:inline">Xizmat</span>
+                </div>
+                <div className={`w-12 h-0.5 ${currentStep >= 3 ? 'bg-barber-olive' : 'bg-gray-300'}`}></div>
+                <div className={`flex items-center ${currentStep >= 3 ? 'text-barber-olive' : 'text-gray-400'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    currentStep >= 3 ? 'border-barber-olive bg-barber-olive text-white' : 'border-gray-300 bg-white'
+                  }`}>
+                    3
+                  </div>
+                  <span className="ml-2 text-sm font-medium hidden sm:inline">Ma'lumotlar</span>
+                </div>
+              </div>
+            </div>
 
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
@@ -216,167 +366,303 @@ function Booking() {
             )}
 
             <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-lg border border-gray-200">
-              <form onSubmit={handleFormSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Barber</label>
-                  <select
-                    value={formData.barber_id}
-                    onChange={(e) => handleInputChange('barber_id', e.target.value)}
-                    disabled={isSubmitting}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="">Barberni tanlang</option>
-                    {barbers.map((barber) => (
-                      <option key={barber.id || barber._id} value={String(barber.id || barber._id)}>
-                        {barber.name || barber.fullName || 'Barber'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Xizmat</label>
-                  <select
-                    value={formData.service_id}
-                    onChange={(e) => handleInputChange('service_id', e.target.value)}
-                    disabled={isSubmitting}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="">Xizmatni tanlang</option>
-                    {services.map((service) => {
-                      const serviceName = service.name || service.title || 'Service'
-                      const servicePrice = service.price ? ` - ${service.price}` : ''
-                      const serviceDuration = service.duration ? ` (${service.duration} min)` : ''
-                      return (
-                        <option key={service.id || service._id} value={String(service.id || service._id)}>
-                          {serviceName}{servicePrice}{serviceDuration}
-                        </option>
-                      )
-                    })}
-                  </select>
-                </div>
-
-                <Input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
-                  label="Sana"
-                  min={today}
-                  required
-                  size="lg"
-                  disabled={isSubmitting}
-                />
-
-                <Input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange('time', e.target.value)}
-                  label="Vaqt"
-                  required
-                  size="lg"
-                  disabled={isSubmitting}
-                />
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  size="lg"
-                  className="w-full bg-barber-olive hover:bg-barber-gold text-white font-semibold"
-                  loading={isSubmitting}
-                >
-                  {isSubmitting ? 'Bron qilinmoqda...' : 'Vaqt belgilash'}
-                </Button>
-              </form>
-            </div>
-          </div>
-
-          {/* My Bookings Section */}
-          <div className="mt-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-6 text-center">Mening Bronlarim</h2>
-            
-            {loadingBookings ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-barber-gold mx-auto mb-4"></div>
-                <p className="text-gray-600">Bronlaringiz yuklanmoqda...</p>
-              </div>
-            ) : myBookings.length === 0 ? (
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-8 shadow-lg border border-gray-200 text-center">
-                <p className="text-gray-600 text-lg">Sizda hali bronlar yo'q.</p>
-                <p className="text-gray-500 text-sm mt-2">Boshlash uchun yuqorida vaqt belgilang!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {myBookings.map((booking) => {
-                  const getStatusColor = (status) => {
-                    switch (status?.toLowerCase()) {
-                      case 'approved':
-                        return 'bg-green-100 text-green-800 border-green-300'
-                      case 'rejected':
-                        return 'bg-red-100 text-red-800 border-red-300'
-                      case 'pending':
-                        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-                      default:
-                        return 'bg-gray-100 text-gray-800 border-gray-300'
-                    }
-                  }
-
-                  const barberName = booking.barber?.name || booking.barber_name || 'N/A'
-                  const serviceName = booking.service?.name || booking.service_name || 'N/A'
-                  const servicePrice = booking.service?.price ? parseFloat(booking.service.price).toLocaleString('uz-UZ') + ' UZS' : 'N/A'
-                  const serviceDuration = booking.service?.duration ? `${booking.service.duration} min` : 'N/A'
-
-                  return (
-                    <div
-                      key={booking.id || booking._id}
-                      className="bg-white rounded-2xl sm:rounded-3xl p-6 shadow-lg border border-gray-200"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-lg sm:text-xl font-bold text-black">{serviceName}</h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(booking.status)}`}>
-                              {booking.status || 'pending'}
-                            </span>
-                          </div>
-                          <div className="space-y-2 text-sm sm:text-base text-gray-700">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">Barber:</span>
-                              <span>{barberName}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">Sana:</span>
-                              <span>{booking.date || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">Vaqt:</span>
-                              <span>{booking.time || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">Narx:</span>
-                              <span>{servicePrice}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">Davomiyligi:</span>
-                              <span>{serviceDuration}</span>
-                            </div>
-                            {booking.comment && (
-                              <div className="flex items-start gap-2 mt-2">
-                                <span className="font-semibold">Izoh:</span>
-                                <span className="text-gray-600">{booking.comment}</span>
-                              </div>
+              {/* Step 1: Barber and Time Selection */}
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-black mb-4">Barber va vaqtni tanlang</h2>
+                  
+                  {/* Barbers Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Barberni tanlang</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {barbers.map((barber) => {
+                        const barberId = String(barber.id || barber._id)
+                        const isSelected = formData.barber_id === barberId
+                        return (
+                          <button
+                            key={barberId}
+                            type="button"
+                            onClick={() => handleInputChange('barber_id', barberId)}
+                            className={`p-4 rounded-lg border-2 transition-all text-left ${
+                              isSelected
+                                ? 'border-barber-olive bg-barber-olive/10'
+                                : 'border-gray-300 hover:border-barber-olive/50'
+                            }`}
+                          >
+                            <h3 className="font-bold text-lg text-black mb-1">
+                              {barber.name || barber.fullName || 'Barber'}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              Ish vaqti: 8:00 - 21:00
+                            </p>
+                            {isSelected && (
+                              <p className="text-sm text-barber-olive font-semibold mt-2">✓ Tanlangan</p>
                             )}
-                          </div>
-                        </div>
-                      </div>
+                          </button>
+                        )
+                      })}
                     </div>
-                  )
-                })}
-              </div>
-            )}
+                  </div>
+
+                  {/* Today's Date Display */}
+                  {formData.barber_id && (
+                    <div className="bg-barber-olive/10 border border-barber-olive rounded-lg p-3 mb-4">
+                      <p className="text-sm text-gray-600 mb-1">Sana:</p>
+                      <p className="text-base font-bold text-black">{formatDateDisplay(today)}</p>
+                    </div>
+                  )}
+
+                  {/* Time Selection - Organized by Hours with Switch Buttons */}
+                  {formData.barber_id && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block text-sm font-medium text-gray-700">Vaqtni tanlang</label>
+                        <button
+                          type="button"
+                          onClick={toggleCustomTime}
+                          className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                            useCustomTime
+                              ? 'bg-barber-olive text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {useCustomTime ? 'Soatlar' : 'Boshqa vaqt'}
+                        </button>
+                      </div>
+                      
+                      {!useCustomTime ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                          {Object.entries(timeSlotsByHour).map(([hour, slots]) => {
+                            const hourNum = parseInt(hour)
+                            const time = slots[0] // Only one time slot per hour now
+                            const isSelected = formData.time === time
+                            const displayHour = hourNum < 12 ? `${hourNum}:00` : hourNum === 12 ? '12:00' : `${hourNum}:00`
+                            const period = hourNum < 12 ? 'AM' : 'PM'
+                            
+                            return (
+                              <button
+                                key={hour}
+                                type="button"
+                                onClick={() => handleInputChange('time', time)}
+                                className={`relative px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                  isSelected
+                                    ? 'bg-barber-olive text-white shadow-lg transform scale-105'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md border border-gray-300'
+                                }`}
+                                disabled={isSubmitting}
+                              >
+                                <div className="text-center">
+                                  <div className="text-base font-bold">{displayHour}</div>
+                                  <div className="text-xs opacity-75">{period}</div>
+                                </div>
+                                {isSelected && (
+                                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                                    <svg className="w-3 h-3 text-barber-olive" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </span>
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Input
+                            type="time"
+                            name="customTime"
+                            value={customTime}
+                            onChange={(e) => handleCustomTimeChange(e.target.value)}
+                            label="Boshqa vaqt kiriting"
+                            placeholder="HH:MM (masalan: 14:30)"
+                            size="lg"
+                            disabled={isSubmitting}
+                            min="08:00"
+                            max="21:00"
+                          />
+                          <p className="text-xs text-gray-500">
+                            Iltimos, vaqtni 8:00 dan 21:00 gacha kiriting
+                          </p>
+                          {formData.time && (
+                            <div className="p-3 bg-barber-olive/10 border border-barber-olive rounded-lg">
+                              <p className="text-sm text-gray-600">Tanlangan vaqt:</p>
+                              <p className="text-base font-bold text-black">{formData.time}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={!formData.barber_id || !formData.time}
+                      size="lg"
+                      className="bg-barber-olive hover:bg-barber-gold text-white font-semibold"
+                    >
+                      Keyingi
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Service Selection */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-black mb-4">Xizmatni tanlang</h2>
+                  
+                  {/* Selected Barber and Time Summary */}
+                  {selectedBarber && (
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-gray-600 mb-1">Tanlangan:</p>
+                      <p className="font-semibold text-black">
+                        {selectedBarber.name || selectedBarber.fullName} - {formData.date} {formData.time}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Services Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Xizmatni tanlang</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {services.map((service) => {
+                        const serviceId = String(service.id || service._id)
+                        const isSelected = formData.service_id === serviceId
+                        const serviceName = service.name || service.title || 'Service'
+                        const servicePrice = service.price || (service.price_raw ? `${parseFloat(service.price_raw).toLocaleString('uz-UZ')} UZS` : '')
+                        const serviceDuration = service.duration ? `${service.duration} min` : ''
+                        
+                        return (
+                          <button
+                            key={serviceId}
+                            type="button"
+                            onClick={() => handleInputChange('service_id', serviceId)}
+                            className={`p-4 rounded-lg border-2 transition-all text-left ${
+                              isSelected
+                                ? 'border-barber-olive bg-barber-olive/10'
+                                : 'border-gray-300 hover:border-barber-olive/50'
+                            }`}
+                          >
+                            <h3 className="font-bold text-lg text-black mb-1">
+                              {serviceName}
+                            </h3>
+                            {servicePrice && (
+                              <p className="text-sm font-semibold text-barber-olive mb-1">{servicePrice}</p>
+                            )}
+                            {serviceDuration && (
+                              <p className="text-sm text-gray-600">{serviceDuration}</p>
+                            )}
+                            {isSelected && (
+                              <p className="text-sm text-barber-olive font-semibold mt-2">✓ Tanlangan</p>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <Button
+                      type="button"
+                      onClick={handlePrevious}
+                      variant="outlined"
+                      size="lg"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      Orqaga
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={!formData.service_id}
+                      size="lg"
+                      className="bg-barber-olive hover:bg-barber-gold text-white font-semibold"
+                    >
+                      Keyingi
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Personal Details */}
+              {currentStep === 3 && (
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-black mb-4">Shaxsiy ma'lumotlar</h2>
+                  
+                  {/* Summary */}
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-gray-600 mb-2">Bron ma'lumotlari:</p>
+                    {selectedBarber && (
+                      <p className="text-sm text-black mb-1">
+                        <span className="font-semibold">Barber:</span> {selectedBarber.name || selectedBarber.fullName}
+                      </p>
+                    )}
+                    <p className="text-sm text-black mb-1">
+                      <span className="font-semibold">Sana va Vaqt:</span> {formatDateDisplay(formData.date || today)} {formData.time}
+                    </p>
+                    {formData.service_id && (
+                      <p className="text-sm text-black">
+                        <span className="font-semibold">Xizmat:</span> {
+                          services.find(s => String(s.id || s._id) === formData.service_id)?.name || 
+                          services.find(s => String(s.id || s._id) === formData.service_id)?.title || 
+                          'N/A'
+                        }
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Name Input */}
+                  <Input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    label="Ism"
+                    placeholder="Ismingizni kiriting"
+                    required
+                    size="lg"
+                    disabled={isSubmitting}
+                  />
+
+                  {/* Phone Input */}
+                  <Input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    label="Telefon raqami"
+                    placeholder="+998 XX XXX XX XX"
+                    required
+                    size="lg"
+                    disabled={isSubmitting}
+                  />
+
+                  <div className="flex justify-between pt-4">
+                    <Button
+                      type="button"
+                      onClick={handlePrevious}
+                      variant="outlined"
+                      size="lg"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                      disabled={isSubmitting}
+                    >
+                      Orqaga
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !formData.name || !formData.phone}
+                      size="lg"
+                      className="bg-barber-olive hover:bg-barber-gold text-white font-semibold"
+                      loading={isSubmitting}
+                    >
+                      {isSubmitting ? 'Bron qilinmoqda...' : 'Bron qilish'}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -386,4 +672,3 @@ function Booking() {
 }
 
 export default Booking
-

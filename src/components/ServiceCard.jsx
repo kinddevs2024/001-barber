@@ -1,18 +1,12 @@
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 
 function ServiceCard({ service, index }) {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
 
   const handleServiceClick = () => {
-    if (!isAuthenticated()) {
-      navigate('/login')
-    } else {
-      navigate('/booking')
-    }
+    navigate('/booking')
   }
   // Icon mapping based on service type
   const getIcon = () => {
