@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { Button, Input } from '@material-tailwind/react'
 import { BOOKINGS_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL, BARBERS_BASE_URL } from '../data/api'
 import Footer from '../components/Footer'
+import fakeServices from '../data/fakeData/services.json'
+import fakeBarbers from '../data/fakeData/barbers.json'
+import { fetchWithTimeout } from '../utils/api'
 
 function Booking() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -65,22 +68,22 @@ function Booking() {
         console.log('Fetching barbers from:', `${BARBERS_BASE_URL}${API_ENDPOINTS.barbers}`)
         
         const [servicesRes, barbersRes] = await Promise.all([
-          fetch(`${SERVICES_BASE_URL}${API_ENDPOINTS.services}`, {
+          fetchWithTimeout(`${SERVICES_BASE_URL}${API_ENDPOINTS.services}`, {
             method: 'GET',
             headers: {
               'Accept': '*/*',
               'Content-Type': 'application/json'
             },
             mode: 'cors'
-          }),
-          fetch(`${BARBERS_BASE_URL}${API_ENDPOINTS.barbers}`, {
+          }, 5000),
+          fetchWithTimeout(`${BARBERS_BASE_URL}${API_ENDPOINTS.barbers}`, {
             method: 'GET',
             headers: {
               'Accept': '*/*',
               'Content-Type': 'application/json'
             },
             mode: 'cors'
-          })
+          }, 5000)
         ])
 
         console.log('Services response status:', servicesRes.status)
@@ -105,7 +108,13 @@ function Booking() {
         console.log('Barbers data:', barbersData)
 
         // Handle services response - API returns array directly
-        const servicesList = Array.isArray(servicesData) ? servicesData : (servicesData.data || servicesData.services || [])
+        let servicesList = Array.isArray(servicesData) ? servicesData : (servicesData.data || servicesData.services || [])
+        
+        // Use fake data if API returns empty array
+        if (!servicesList || servicesList.length === 0) {
+          console.warn('No services from API, using fake data')
+          servicesList = fakeServices
+        }
         
         // Map services to include formatted price
         const mappedServices = servicesList.map((service) => ({
@@ -119,7 +128,13 @@ function Booking() {
         setServices(mappedServices)
         
         // Handle barbers response
-        const barbersList = Array.isArray(barbersData) ? barbersData : (barbersData.data || barbersData.barbers || [])
+        let barbersList = Array.isArray(barbersData) ? barbersData : (barbersData.data || barbersData.barbers || [])
+        
+        // Use fake data if API returns empty array
+        if (!barbersList || barbersList.length === 0) {
+          console.warn('No barbers from API, using fake data')
+          barbersList = fakeBarbers
+        }
         
         // Map barbers to ensure _id exists
         const mappedBarbers = barbersList.map((barber) => ({
@@ -131,7 +146,30 @@ function Booking() {
         setBarbers(mappedBarbers)
       } catch (err) {
         console.error('Error fetching data:', err)
-        setError('Failed to load services and barbers')
+        if (err.message && err.message.includes('timeout')) {
+          console.warn('Request timeout after 5 seconds, using fake data')
+          setError('Backend javob bermadi (5 soniya), demo ma\'lumotlar ishlatilmoqda')
+        } else {
+          console.warn('Using fake data due to API error')
+          setError('Backend ma\'lumotlarni yuklay olmadi, demo ma\'lumotlar ishlatilmoqda')
+        }
+        
+        // Use fake data as fallback
+        const mappedFakeServices = fakeServices.map((service) => ({
+          ...service,
+          _id: String(service.id),
+          title: service.name,
+          price: service.price ? `${parseFloat(service.price).toLocaleString('uz-UZ')} UZS` : ''
+        }))
+        
+        const mappedFakeBarbers = fakeBarbers.map((barber) => ({
+          ...barber,
+          _id: String(barber.id),
+          fullName: barber.name || barber.fullName || barber.full_name
+        }))
+        
+        setServices(mappedFakeServices)
+        setBarbers(mappedFakeBarbers)
       } finally {
         setLoading(false)
       }

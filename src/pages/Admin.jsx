@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { API_ENDPOINTS, BOOKINGS_BASE_URL, AUTH_BASE_URL } from '../data/api'
 import { apiRequest } from '../utils/api'
 import Footer from '../components/Footer'
+import fakeBookings from '../data/fakeData/bookings.json'
 
 function Admin() {
   const navigate = useNavigate()
@@ -46,14 +47,20 @@ function Admin() {
       console.log('Fetching bookings from:', endpoint)
       const response = await apiRequest(endpoint, {
         method: 'GET'
-      }, true) // Use bookings base URL
+      }, true, 5000) // Use bookings base URL with 5 second timeout
 
       if (!response.ok) {
         throw new Error(`Failed to fetch bookings: ${response.status}`)
       }
 
       const data = await response.json()
-      const bookingsList = Array.isArray(data) ? data : (data.data || data.bookings || [])
+      let bookingsList = Array.isArray(data) ? data : (data.data || data.bookings || [])
+      
+      // Use fake data if API returns empty array
+      if (!bookingsList || bookingsList.length === 0) {
+        console.warn('No bookings from API, using fake data')
+        bookingsList = fakeBookings
+      }
       
       // Filter bookings if needed
       if (filter !== 'all' && filter !== 'pending') {
@@ -65,8 +72,25 @@ function Admin() {
         setBookings(bookingsList)
       }
     } catch (err) {
-      setError(err.message || 'Bronlarni yuklash muvaffaqiyatsiz')
       console.error('Error fetching bookings:', err)
+      if (err.message && err.message.includes('timeout')) {
+        console.warn('Request timeout after 5 seconds, using fake data')
+        setError('Backend javob bermadi (5 soniya), demo ma\'lumotlar ishlatilmoqda.')
+      } else {
+        console.warn('Using fake data due to API error')
+        setError(err.message || 'Bronlarni yuklash muvaffaqiyatsiz. Demo ma\'lumotlar ishlatilmoqda.')
+      }
+      // Use fake data as fallback
+      let bookingsList = fakeBookings
+      // Filter bookings if needed
+      if (filter !== 'all' && filter !== 'pending') {
+        const filtered = bookingsList.filter(booking => 
+          booking.status?.toLowerCase() === filter.toLowerCase()
+        )
+        setBookings(filtered)
+      } else {
+        setBookings(bookingsList)
+      }
     } finally {
       setLoading(false)
     }

@@ -5,8 +5,18 @@ export const getAuthToken = () => {
   return localStorage.getItem('token')
 }
 
-// Make authenticated API request
-export const apiRequest = async (endpoint, options = {}, useBookingsBase = false) => {
+// Timeout wrapper for fetch requests (5000ms = 5 seconds)
+export const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timeout after 5000ms')), timeout)
+    )
+  ])
+}
+
+// Make authenticated API request with timeout support
+export const apiRequest = async (endpoint, options = {}, useBookingsBase = false, timeout = 5000) => {
   const token = getAuthToken()
   
   const baseURL = useBookingsBase ? BOOKINGS_BASE_URL : API_BASE_URL
@@ -25,14 +35,15 @@ export const apiRequest = async (endpoint, options = {}, useBookingsBase = false
     url: `${baseURL}${endpoint}`,
     method: options.method || 'GET',
     hasToken: !!token,
-    headers
+    headers,
+    timeout
   })
 
-  const response = await fetch(`${baseURL}${endpoint}`, {
+  const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
     ...options,
     headers,
     mode: 'cors'
-  })
+  }, timeout)
 
   console.log('API response:', {
     status: response.status,

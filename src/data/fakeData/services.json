@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "name": "Soch olish",
+    "title": "Soch olish",
+    "price": 50000,
+    "duration": 30,
+    "description": "Professional soch olish xizmati"
+  },
+  {
+    "id": 2,
+    "name": "Soqol olish",
+    "title": "Soqol olish",
+    "price": 30000,
+    "duration": 20,
+    "description": "Professional soqol olish xizmati"
+  },
+  {
+    "id": 3,
+    "name": "Soch va soqol",
+    "title": "Soch va soqol",
+    "price": 70000,
+    "duration": 45,
+    "description": "Soch va soqol olish xizmati"
+  },
+  {
+    "id": 4,
+    "name": "Yuz parvarishi",
+    "title": "Yuz parvarishi",
+    "price": 40000,
+    "duration": 25,
+    "description": "Professional yuz parvarishi"
+  },
+  {
+    "id": 5,
+    "name": "Bolalar soch olish",
+    "title": "Bolalar soch olish",
+    "price": 35000,
+    "duration": 25,
+    "description": "Bolalar uchun soch olish xizmati"
+  },
+  {
+    "id": 6,
+    "name": "Qirqish",
+    "title": "Qirqish",
+    "price": 25000,
+    "duration": 15,
+    "description": "Professional qirqish xizmati"
+  },
+  {
+    "id": 7,
+    "name": "Royal Shave",
+    "title": "Royal Shave",
+    "price": 45000,
+    "duration": 30,
+    "description": "Traditional hot towel shaves"
+  },
+  {
+    "id": 8,
+    "name": "Beard Trim",
+    "title": "Beard Trim",
+    "price": 35000,
+    "duration": 20,
+    "description": "Precision beard grooming"
+  }
+]
+

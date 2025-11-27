@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "name": "Ahmad",
+    "fullName": "Ahmad",
+    "full_name": "Ahmad",
+    "working_hours": "8:00 - 21:00",
+    "role": "Barber",
+    "description": "Professional barber with 10 years of experience"
+  },
+  {
+    "id": 2,
+    "name": "Umar",
+    "fullName": "Umar",
+    "full_name": "Umar",
+    "working_hours": "8:00 - 21:00",
+    "role": "Barber",
+    "description": "Expert in modern cuts and fades"
+  },
+  {
+    "id": 3,
+    "name": "Ali",
+    "fullName": "Ali",
+    "full_name": "Ali",
+    "working_hours": "8:00 - 21:00",
+    "role": "Barber",
+    "description": "Master of classic styles and traditional barbering"
+  },
+  {
+    "id": 4,
+    "name": "Hasan",
+    "fullName": "Hasan",
+    "full_name": "Hasan",
+    "working_hours": "8:00 - 21:00",
+    "role": "Stylist",
+    "description": "Creative stylist specializing in contemporary looks"
+  }
+]
+

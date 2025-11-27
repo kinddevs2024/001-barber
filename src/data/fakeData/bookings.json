@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "client_name": "John Doe",
+    "phone_number": "+998901234567",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [1, 2],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" }
+    ],
+    "date": "2024-01-15",
+    "time": "10:00",
+    "status": "pending",
+    "created_at": "2024-01-14T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "client_name": "Jane Smith",
+    "phone_number": "+998901234568",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [3],
+    "services": [
+      { "id": 3, "name": "Soch va soqol" }
+    ],
+    "date": "2024-01-15",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2024-01-14T11:00:00Z"
+  },
+  {
+    "id": 3,
+    "client_name": "Bob Johnson",
+    "phone_number": "+998901234569",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [4, 5],
+    "services": [
+      { "id": 4, "name": "Yuz parvarishi" },
+      { "id": 5, "name": "Bolalar soch olish" }
+    ],
+    "date": "2024-01-16",
+    "time": "16:00",
+    "status": "rejected",
+    "created_at": "2024-01-14T12:00:00Z"
+  }
+]
+

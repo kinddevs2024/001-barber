@@ -6,6 +6,8 @@ import { Button } from '@material-tailwind/react'
 import { servicesData, whyChooseUs, contactInfo } from '../data'
 import { imagePool, getImagesInOrder } from '../data/images'
 import { API_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL } from '../data/api'
+import fakeServices from '../data/fakeData/services.json'
+import { fetchWithTimeout } from '../utils/api'
 import ServiceCard from '../components/ServiceCard'
 import ContactForm from '../components/ContactForm'
 import RegisterModal from '../components/RegisterModal'
@@ -24,14 +26,14 @@ function Home() {
         setLoadingServices(true)
         console.log('Fetching services from:', `${SERVICES_BASE_URL}${API_ENDPOINTS.services}`)
         
-        const response = await fetch(`${SERVICES_BASE_URL}${API_ENDPOINTS.services}`, {
+        const response = await fetchWithTimeout(`${SERVICES_BASE_URL}${API_ENDPOINTS.services}`, {
           method: 'GET',
           headers: {
             'Accept': '*/*',
             'Content-Type': 'application/json'
           },
           mode: 'cors'
-        })
+        }, 5000)
         
         console.log('Services response status:', response.status, response.statusText)
         
@@ -44,7 +46,13 @@ function Home() {
         const data = await response.json()
         console.log('Services data received:', data)
         // Handle both array response and object with data property
-        const servicesList = Array.isArray(data) ? data : (data.data || data.services || [])
+        let servicesList = Array.isArray(data) ? data : (data.data || data.services || [])
+        
+        // Use fake data if API returns empty array
+        if (!servicesList || servicesList.length === 0) {
+          console.warn('No services from API, using fake data')
+          servicesList = fakeServices
+        }
         
         // Map API response to expected format with icon mapping
         const mappedServices = servicesList.map((service, index) => {
@@ -97,8 +105,48 @@ function Home() {
           stack: err.stack,
           name: err.name
         })
-        // Fallback to static data on error
-        setServices(servicesData)
+        if (err.message && err.message.includes('timeout')) {
+          console.warn('Request timeout after 5 seconds, using fake data')
+        } else {
+          console.warn('Using fake data due to API error')
+        }
+        // Fallback to fake data from JSON on error
+        const mappedFakeServices = fakeServices.map((service, index) => {
+          const getIconType = (name) => {
+            const nameLower = (name || '').toLowerCase()
+            if (nameLower.includes('haircut') || nameLower.includes('hair cut') || nameLower.includes('hair') || nameLower.includes('soch')) {
+              return 'scissors'
+            } else if (nameLower.includes('beard') || nameLower.includes('soqol') || nameLower.includes('facial') || nameLower.includes('yuz')) {
+              return 'beard'
+            } else if (nameLower.includes('shave') || nameLower.includes('razor') || nameLower.includes('qirqish')) {
+              return 'razor'
+            } else if (nameLower.includes('kid') || nameLower.includes('child') || nameLower.includes('bola')) {
+              return 'kid'
+            }
+            return 'scissors'
+          }
+          const formatPrice = (price) => {
+            if (!price) return 'N/A'
+            const numPrice = parseFloat(price)
+            if (isNaN(numPrice)) return price
+            return new Intl.NumberFormat('uz-UZ', {
+              style: 'currency',
+              currency: 'UZS',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0
+            }).format(numPrice)
+          }
+          return {
+            id: service.id || index + 1,
+            name: service.name || service.title || 'Service',
+            icon: getIconType(service.name || service.title),
+            description: service.description || `${service.duration ? `${service.duration} min` : 'Professional service'}`,
+            price: service.price ? formatPrice(service.price) : null,
+            duration: service.duration || null,
+            originalPrice: service.price || null
+          }
+        })
+        setServices(mappedFakeServices.length > 0 ? mappedFakeServices : servicesData)
       } finally {
         setLoadingServices(false)
       }
