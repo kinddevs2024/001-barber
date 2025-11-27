@@ -7,7 +7,7 @@ function Booking() {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     barber_id: '',
-    service_id: '',
+    service_ids: [], // Changed to array for multiple selection
     date: '',
     time: '',
     name: '',
@@ -151,7 +151,7 @@ function Booking() {
       const bookingData = {
         phone_number: formData.phone,
         barber_id: parseInt(formData.barber_id),
-        service_ids: [parseInt(formData.service_id)], // Array as per API
+        service_ids: formData.service_ids.map(id => parseInt(id)), // Array of selected service IDs
         date: today, // Always use today's date
         time: formData.time,
         client_name: formData.name
@@ -176,7 +176,7 @@ function Booking() {
         setSuccess(true)
         setFormData({ 
           barber_id: '', 
-          service_id: '', 
+          service_ids: [], // Reset to empty array
           date: today, // Reset to today's date
           time: '', 
           name: '', 
@@ -194,7 +194,7 @@ function Booking() {
       }
     } catch (err) {
       console.error('Booking error:', err)
-      setError(err.message || 'Tarmoq xatosi. Iltimos, internet aloqangizni tekshiring va qayta urinib ko\'ring.')
+        setError(err.message || 'Tarmoq xatosi. Iltimos, internet aloqangizni tekshiring va qayta urinib ko\'ring.')
     } finally {
       setIsSubmitting(false)
     }
@@ -211,13 +211,37 @@ function Booking() {
     if (name === 'barber_id') {
       const barber = barbers.find(b => String(b.id || b._id) === value)
       setSelectedBarber(barber || null)
-    }
+  }
 
     // When time is selected from preset hours, disable custom time
     if (name === 'time' && !useCustomTime) {
       setUseCustomTime(false)
       setCustomTime('')
     }
+  }
+
+  // Handle service selection (toggle multiple services)
+  const handleServiceToggle = (serviceId) => {
+    const serviceIdString = String(serviceId)
+    setFormData(prev => {
+      const currentIds = prev.service_ids || []
+      const isSelected = currentIds.includes(serviceIdString)
+      
+      if (isSelected) {
+        // Remove service if already selected
+        return {
+          ...prev,
+          service_ids: currentIds.filter(id => id !== serviceIdString)
+        }
+      } else {
+        // Add service if not selected
+        return {
+          ...prev,
+          service_ids: [...currentIds, serviceIdString]
+        }
+      }
+    })
+    if (error) setError('')
   }
 
   const handleCustomTimeChange = (value) => {
@@ -277,9 +301,9 @@ function Booking() {
       }
       setCurrentStep(2)
     } else if (currentStep === 2) {
-      // Validate step 2: service must be selected
-      if (!formData.service_id) {
-        setError('Iltimos, xizmatni tanlang')
+      // Validate step 2: at least one service must be selected
+      if (!formData.service_ids || formData.service_ids.length === 0) {
+        setError('Iltimos, kamida bitta xizmatni tanlang')
         return
       }
       setCurrentStep(3)
@@ -372,7 +396,7 @@ function Booking() {
                   <h2 className="text-xl sm:text-2xl font-bold text-black mb-4">Barber va vaqtni tanlang</h2>
                   
                   {/* Barbers Selection */}
-                  <div>
+                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">Barberni tanlang</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {barbers.map((barber) => {
@@ -388,9 +412,9 @@ function Booking() {
                                 ? 'border-barber-olive bg-barber-olive/10'
                                 : 'border-gray-300 hover:border-barber-olive/50'
                             }`}
-                          >
+                  >
                             <h3 className="font-bold text-lg text-black mb-1">
-                              {barber.name || barber.fullName || 'Barber'}
+                        {barber.name || barber.fullName || 'Barber'}
                             </h3>
                             <p className="text-sm text-gray-600">
                               Ish vaqti: 8:00 - 21:00
@@ -402,7 +426,7 @@ function Booking() {
                         )
                       })}
                     </div>
-                  </div>
+                </div>
 
                   {/* Today's Date Display */}
                   {formData.barber_id && (
@@ -414,7 +438,7 @@ function Booking() {
 
                   {/* Time Selection - Organized by Hours with Switch Buttons */}
                   {formData.barber_id && (
-                    <div>
+                <div>
                       <div className="flex items-center justify-between mb-3">
                         <label className="block text-sm font-medium text-gray-700">Vaqtni tanlang</label>
                         <button
@@ -476,7 +500,7 @@ function Booking() {
                             label="Boshqa vaqt kiriting"
                             placeholder="HH:MM (masalan: 14:30)"
                             size="lg"
-                            disabled={isSubmitting}
+                    disabled={isSubmitting}
                             min="08:00"
                             max="21:00"
                           />
@@ -525,27 +549,41 @@ function Booking() {
 
                   {/* Services Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Xizmatni tanlang</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Xizmatni tanlang {formData.service_ids.length > 0 && `(${formData.service_ids.length} tanlangan)`}
+                    </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {services.map((service) => {
+                    {services.map((service) => {
                         const serviceId = String(service.id || service._id)
-                        const isSelected = formData.service_id === serviceId
-                        const serviceName = service.name || service.title || 'Service'
+                        const isSelected = formData.service_ids && formData.service_ids.includes(serviceId)
+                      const serviceName = service.name || service.title || 'Service'
                         const servicePrice = service.price || (service.price_raw ? `${parseFloat(service.price_raw).toLocaleString('uz-UZ')} UZS` : '')
                         const serviceDuration = service.duration ? `${service.duration} min` : ''
                         
-                        return (
+                      return (
                           <button
                             key={serviceId}
                             type="button"
-                            onClick={() => handleInputChange('service_id', serviceId)}
-                            className={`p-4 rounded-lg border-2 transition-all text-left ${
+                            onClick={() => handleServiceToggle(serviceId)}
+                            className={`p-4 rounded-lg border-2 transition-all text-left relative ${
                               isSelected
                                 ? 'border-barber-olive bg-barber-olive/10'
                                 : 'border-gray-300 hover:border-barber-olive/50'
                             }`}
                           >
-                            <h3 className="font-bold text-lg text-black mb-1">
+                            {/* Checkbox indicator */}
+                            <div className={`absolute top-3 right-3 w-6 h-6 rounded border-2 flex items-center justify-center ${
+                              isSelected
+                                ? 'border-barber-olive bg-barber-olive'
+                                : 'border-gray-300 bg-white'
+                            }`}>
+                              {isSelected && (
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                            <h3 className="font-bold text-lg text-black mb-1 pr-8">
                               {serviceName}
                             </h3>
                             {servicePrice && (
@@ -553,9 +591,6 @@ function Booking() {
                             )}
                             {serviceDuration && (
                               <p className="text-sm text-gray-600">{serviceDuration}</p>
-                            )}
-                            {isSelected && (
-                              <p className="text-sm text-barber-olive font-semibold mt-2">✓ Tanlangan</p>
                             )}
                           </button>
                         )
@@ -576,7 +611,7 @@ function Booking() {
                     <Button
                       type="button"
                       onClick={handleNext}
-                      disabled={!formData.service_id}
+                      disabled={!formData.service_ids || formData.service_ids.length === 0}
                       size="lg"
                       className="bg-barber-olive hover:bg-barber-gold text-white font-semibold"
                     >
@@ -602,42 +637,48 @@ function Booking() {
                     <p className="text-sm text-black mb-1">
                       <span className="font-semibold">Sana va Vaqt:</span> {formatDateDisplay(formData.date || today)} {formData.time}
                     </p>
-                    {formData.service_id && (
-                      <p className="text-sm text-black">
-                        <span className="font-semibold">Xizmat:</span> {
-                          services.find(s => String(s.id || s._id) === formData.service_id)?.name || 
-                          services.find(s => String(s.id || s._id) === formData.service_id)?.title || 
-                          'N/A'
-                        }
-                      </p>
+                    {formData.service_ids && formData.service_ids.length > 0 && (
+                      <div className="text-sm text-black">
+                        <span className="font-semibold">Xizmatlar:</span>
+                        <ul className="list-disc list-inside mt-1 ml-2">
+                          {formData.service_ids.map(serviceId => {
+                            const service = services.find(s => String(s.id || s._id) === serviceId)
+                            return (
+                              <li key={serviceId}>
+                                {service?.name || service?.title || 'N/A'}
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
                     )}
-                  </div>
+                </div>
 
                   {/* Name Input */}
-                  <Input
+                <Input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     label="Ism"
                     placeholder="Ismingizni kiriting"
-                    required
-                    size="lg"
-                    disabled={isSubmitting}
-                  />
+                  required
+                  size="lg"
+                  disabled={isSubmitting}
+                />
 
                   {/* Phone Input */}
-                  <Input
+                <Input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     label="Telefon raqami"
                     placeholder="+998 XX XXX XX XX"
-                    required
-                    size="lg"
-                    disabled={isSubmitting}
-                  />
+                  required
+                  size="lg"
+                  disabled={isSubmitting}
+                />
 
                   <div className="flex justify-between pt-4">
                     <Button
@@ -650,19 +691,19 @@ function Booking() {
                     >
                       Orqaga
                     </Button>
-                    <Button
-                      type="submit"
+                <Button
+                  type="submit"
                       disabled={isSubmitting || !formData.name || !formData.phone}
-                      size="lg"
+                  size="lg"
                       className="bg-barber-olive hover:bg-barber-gold text-white font-semibold"
-                      loading={isSubmitting}
-                    >
+                  loading={isSubmitting}
+                >
                       {isSubmitting ? 'Bron qilinmoqda...' : 'Bron qilish'}
-                    </Button>
+                </Button>
                   </div>
-                </form>
-              )}
-            </div>
+              </form>
+                            )}
+                          </div>
           </div>
         </div>
       </section>

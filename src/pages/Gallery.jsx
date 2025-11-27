@@ -126,24 +126,24 @@ function Gallery() {
               <p className="text-black">Narxlar topilmadi</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-4xl mx-auto">
-              <div className="space-y-3 sm:space-y-4 md:space-y-6">
-                {galleryPricing.slice(0, 4).map((item, i) => (
-                  <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-black border-opacity-20" data-aos="fade-up" data-aos-delay={i * 50}>
-                    <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
-                    <span className="text-black font-semibold text-sm sm:text-base">{item.price}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-3 sm:space-y-4 md:space-y-6">
-                {galleryPricing.slice(4, 8).map((item, i) => (
-                  <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-black border-opacity-20" data-aos="fade-up" data-aos-delay={i * 50}>
-                    <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
-                    <span className="text-black font-semibold text-sm sm:text-base">{item.price}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-4xl mx-auto">
+            <div className="space-y-3 sm:space-y-4 md:space-y-6">
+              {galleryPricing.slice(0, 4).map((item, i) => (
+                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-black border-opacity-20" data-aos="fade-up" data-aos-delay={i * 50}>
+                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                  <span className="text-black font-semibold text-sm sm:text-base">{item.price}</span>
+                </div>
+              ))}
             </div>
+            <div className="space-y-3 sm:space-y-4 md:space-y-6">
+              {galleryPricing.slice(4, 8).map((item, i) => (
+                <div key={item.id} className="flex justify-between items-center py-2 sm:py-3 border-b border-black border-opacity-20" data-aos="fade-up" data-aos-delay={i * 50}>
+                  <span className="text-black font-medium text-sm sm:text-base">{item.name}</span>
+                  <span className="text-black font-semibold text-sm sm:text-base">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
           )}
         </div>
       </section>
