@@ -24,7 +24,7 @@ export const apiRequest = async (endpoint, options = {}, useBookingsBase = false
   const headers = {
     'Content-Type': 'application/json',
     'Accept': '*/*',
-    ...options.headers,
+    ...options.headers,  
   }
 
   if (token) {

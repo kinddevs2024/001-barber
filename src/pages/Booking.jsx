@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button, Input } from '@material-tailwind/react'
 import { BOOKINGS_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL, BARBERS_BASE_URL } from '../data/api'
+import { contactInfo } from '../data/contact'
 import Footer from '../components/Footer'
 import fakeServices from '../data/fakeData/services.json'
 import fakeBarbers from '../data/fakeData/barbers.json'
@@ -25,6 +26,7 @@ function Booking() {
   const [selectedBarber, setSelectedBarber] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
   const [customTime, setCustomTime] = useState('')
+  const [currentMonth, setCurrentMonth] = useState(new Date())
   
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0]
@@ -185,14 +187,17 @@ function Booking() {
     setSuccess(false)
 
     try {
-      // Match API structure: phone_number, client_name, service_ids (array)
+      // Match API structure: phone_number, client_name, service_ids (array), location.address
       const bookingData = {
         phone_number: formData.phone,
         barber_id: parseInt(formData.barber_id),
         service_ids: formData.service_ids.map(id => parseInt(id)), // Array of selected service IDs
-        date: today, // Always use today's date
+        date: formData.date || today,
         time: formData.time,
-        client_name: formData.name
+        client_name: formData.name,
+        location: {
+          address: contactInfo.address || 'Ташкент, Шайхантахурский район, улица Курилиш, 9, Tashkent, Uzbekistan'
+        }
       }
 
       console.log('Submitting booking:', bookingData)
@@ -215,7 +220,7 @@ function Booking() {
         setFormData({ 
           barber_id: '', 
           service_ids: [], // Reset to empty array
-          date: today, // Reset to today's date
+          date: today,
           time: '', 
           name: '', 
           phone: '' 
@@ -332,9 +337,9 @@ function Booking() {
 
   const handleNext = () => {
     if (currentStep === 1) {
-      // Validate step 1: barber and time must be selected (date is auto-set to today)
-      if (!formData.barber_id || !formData.time) {
-        setError('Iltimos, barber va vaqtni tanlang')
+      // Validate step 1: barber, date, and time must be selected
+      if (!formData.barber_id || !formData.date || !formData.time) {
+        setError('Iltimos, barber, sana va vaqtni tanlang')
         return
       }
       setCurrentStep(2)
@@ -364,6 +369,74 @@ function Booking() {
     const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`
   }
+
+  // Calendar functions
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    const days = []
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null)
+    }
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day)
+    }
+    return days
+  }
+
+  const handleDateSelect = (day) => {
+    if (!day) return
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const selectedDate = new Date(year, month, day)
+    const dateString = selectedDate.toISOString().split('T')[0]
+    setFormData(prev => ({
+      ...prev,
+      date: dateString
+    }))
+  }
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  const isDateSelected = (day) => {
+    if (!day || !formData.date) return false
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const dateString = new Date(year, month, day).toISOString().split('T')[0]
+    return formData.date === dateString
+  }
+
+  const isDateToday = (day) => {
+    if (!day) return false
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const dateString = new Date(year, month, day).toISOString().split('T')[0]
+    return dateString === today
+  }
+
+  const isDatePast = (day) => {
+    if (!day) return false
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const dateString = new Date(year, month, day).toISOString().split('T')[0]
+    return dateString < today
+  }
+
+  const monthNames = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']
+  const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan']
 
   if (loading) {
     return (
@@ -466,11 +539,81 @@ function Booking() {
                     </div>
                 </div>
 
-                  {/* Today's Date Display */}
+                  {/* Date Selection Calendar */}
                   {formData.barber_id && (
-                    <div className="bg-barber-olive/10 border border-barber-olive rounded-lg p-3 mb-4">
-                      <p className="text-sm text-gray-600 mb-1">Sana:</p>
-                      <p className="text-base font-bold text-black">{formatDateDisplay(today)}</p>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Sanani tanlang</label>
+                      <div className="bg-white border border-gray-200 rounded-lg p-2 shadow-sm max-w-md mx-auto">
+                        {/* Calendar Header */}
+                        <div className="flex items-center justify-between mb-2">
+                          <button
+                            type="button"
+                            onClick={handlePrevMonth}
+                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <h3 className="text-sm font-semibold text-black">
+                            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={handleNextMonth}
+                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-0.5 mb-1">
+                          {dayNames.map((day) => (
+                            <div key={day} className="text-center text-[10px] font-semibold text-gray-500 py-1">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-0.5">
+                          {getDaysInMonth(currentMonth).map((day, index) => {
+                            if (day === null) {
+                              return <div key={`empty-${index}`} className="aspect-square" />
+                            }
+                            const isSelected = isDateSelected(day)
+                            const isToday = isDateToday(day)
+                            const isPast = isDatePast(day)
+                            
+                            return (
+                              <button
+                                key={day}
+                                type="button"
+                                onClick={() => !isPast && handleDateSelect(day)}
+                                disabled={isPast}
+                                className={`aspect-square rounded text-xs font-medium transition-all ${
+                                  isSelected
+                                    ? 'bg-barber-olive text-white shadow-md scale-105'
+                                    : isToday
+                                    ? 'bg-barber-gold/20 text-black border border-barber-gold'
+                                    : isPast
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:border-barber-olive/50 border border-transparent'
+                                }`}
+                              >
+                                {day}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        {formData.date && (
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <p className="text-xs text-gray-600">Tanlangan sana:</p>
+                            <p className="text-sm font-bold text-barber-olive">{formatDateDisplay(formData.date)}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
