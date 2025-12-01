@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { contactInfo } from '../data/contact'
 import Footer from '../components/Footer'
 
@@ -168,6 +169,7 @@ function Delivery() {
         </div>
       </section>
       <Footer />
+      <Analytics />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { galleryServices } from '../data'
 import { imagePool, getImagesInOrder } from '../data/images'
 import { SERVICES_BASE_URL, API_ENDPOINTS } from '../data/api'
@@ -197,6 +198,7 @@ function Gallery() {
 
       <Footer />
       <RegisterModal open={registerModalOpen} handleOpen={handleRegisterModal} />
+      <Analytics />
     </div>
   )
 }

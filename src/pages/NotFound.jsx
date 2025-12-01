@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import Footer from '../components/Footer'
 
 function NotFound() {
@@ -31,6 +32,7 @@ function NotFound() {
         </div>
       </div>
       <Footer />
+      <Analytics />
     </div>
   )
 }

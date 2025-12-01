@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button, Input } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { AUTH_BASE_URL, API_ENDPOINTS } from '../data/api'
 import { useAuth } from '../context/AuthContext'
 import Footer from '../components/Footer'
@@ -132,6 +133,7 @@ function AdminLogin() {
         </div>
       </section>
       <Footer />
+      <Analytics />
     </div>
   )
 }

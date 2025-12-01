@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { barbersData, contactInfo } from '../data'
 import { imagePool, getImagesInOrder } from '../data/images'
 import { API_BASE_URL, API_ENDPOINTS, BARBERS_BASE_URL } from '../data/api'
@@ -201,6 +202,7 @@ function Team() {
 
       <Footer />
       <RegisterModal open={registerModalOpen} handleOpen={handleRegisterModal} />
+      <Analytics />
     </div>
   )
 }

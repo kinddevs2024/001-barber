@@ -12,6 +12,7 @@ import ServiceCard from '../components/ServiceCard'
 import ContactForm from '../components/ContactForm'
 import RegisterModal from '../components/RegisterModal'
 import Footer from '../components/Footer'
+import { Analytics } from "@vercel/analytics/next"
 
 function Home() {
   const navigate = useNavigate()
@@ -171,7 +172,9 @@ function Home() {
   }
 
   return (
+
     <div>
+      <Analytics />
       {/* Hero Section - Full Page */}
       <section className="w-full h-screen relative overflow-hidden bg-white">
         {/* Content Container */}

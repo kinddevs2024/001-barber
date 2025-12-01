@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -44,6 +45,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
+      <Analytics />
     </Router>
   )
 }

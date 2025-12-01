@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { useAuth } from '../context/AuthContext'
 import { AUTH_BASE_URL, API_ENDPOINTS } from '../data/api'
 import { apiRequest } from '../utils/api'
@@ -356,6 +357,7 @@ function SuperAdmin() {
         </div>
       </section>
       <Footer />
+      <Analytics />
     </div>
   )
 }

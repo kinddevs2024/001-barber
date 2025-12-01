@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button, Input } from '@material-tailwind/react'
+import { Analytics } from '@vercel/analytics/react'
 import { BOOKINGS_BASE_URL, API_ENDPOINTS, SERVICES_BASE_URL, BARBERS_BASE_URL } from '../data/api'
 import { contactInfo } from '../data/contact'
 import Footer from '../components/Footer'
@@ -889,6 +890,7 @@ function Booking() {
         </div>
       </section>
       <Footer />
+      <Analytics />
     </div>
   )
 }
