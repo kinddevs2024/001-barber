@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
+import { motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import Footer from "../components/Footer";
 

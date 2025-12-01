@@ -1,4 +1,5 @@
 import { Button } from "@material-tailwind/react";
+import { motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import { contactInfo } from "../data/contact";
 import Footer from "../components/Footer";

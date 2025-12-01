@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
+import { motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import { barbersData, contactInfo } from "../data";
 import { imagePool, getImagesInOrder } from "../data/images";

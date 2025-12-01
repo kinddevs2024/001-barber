@@ -6,6 +6,7 @@ import {
   EnvelopeIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
+import { motion } from "framer-motion";
 import { servicesData, whyChooseUs, contactInfo } from "../data";
 import { getImagesInOrder } from "../data/images";
 import { API_ENDPOINTS, SERVICES_BASE_URL } from "../data/api";

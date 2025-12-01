@@ -6,6 +6,7 @@ import { AUTH_BASE_URL, API_ENDPOINTS } from "../data/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 
+
 function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();

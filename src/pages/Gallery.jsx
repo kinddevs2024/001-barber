@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import { galleryServices } from "../data";
 import { imagePool, getImagesInOrder } from "../data/images";
