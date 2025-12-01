@@ -1,255 +1,286 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button, Input } from '@material-tailwind/react'
-import { Analytics } from '@vercel/analytics/react'
-import { useAuth } from '../context/AuthContext'
-import { API_ENDPOINTS, BOOKINGS_BASE_URL, AUTH_BASE_URL } from '../data/api'
-import { apiRequest } from '../utils/api'
-import Footer from '../components/Footer'
-import fakeBookings from '../data/fakeData/bookings.json'
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Input } from "@material-tailwind/react";
+import { Analytics } from "@vercel/analytics/react";
+import { useAuth } from "../context/AuthContext";
+import { API_ENDPOINTS, BOOKINGS_BASE_URL, AUTH_BASE_URL } from "../data/api";
+import { apiRequest } from "../utils/api";
+import Footer from "../components/Footer";
+import fakeBookings from "../data/fakeData/bookings.json";
 
 function Admin() {
-  const navigate = useNavigate()
-  const { isAuthenticated, isAdmin, isSuperAdmin, logout } = useAuth()
-  const [bookings, setBookings] = useState([])
-  const [filter, setFilter] = useState('all') // all, pending, approved, rejected
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [showAddAdmin, setShowAddAdmin] = useState(false)
+  const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, isSuperAdmin, logout } = useAuth();
+  const [bookings, setBookings] = useState([]);
+  const [filter, setFilter] = useState("all"); // all, pending, approved, rejected
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [adminForm, setAdminForm] = useState({
-    name: '',
-    tg_username: '',
-    phone_number: '',
-    password: '',
-    role: 'admin'
-  })
-  const [isSubmittingAdmin, setIsSubmittingAdmin] = useState(false)
+    name: "",
+    tg_username: "",
+    phone_number: "",
+    password: "",
+    role: "admin",
+  });
+  const [isSubmittingAdmin, setIsSubmittingAdmin] = useState(false);
 
   useEffect(() => {
     // ProtectedRoute handles authentication, but double-check here
     if (isAuthenticated() && (isAdmin() || isSuperAdmin())) {
-      fetchBookings()
+      fetchBookings();
     }
-  }, [isAuthenticated, isAdmin, isSuperAdmin, filter])
+  }, [isAuthenticated, isAdmin, isSuperAdmin, filter]);
 
   const fetchBookings = async () => {
     try {
-      setLoading(true)
-      setError('')
-      setSuccess('')
-      
-      let endpoint = API_ENDPOINTS.bookings
-      if (filter === 'pending') {
-        endpoint = API_ENDPOINTS.bookingsPending
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      let endpoint = API_ENDPOINTS.bookings;
+      if (filter === "pending") {
+        endpoint = API_ENDPOINTS.bookingsPending;
       }
 
-      console.log('Fetching bookings from:', endpoint)
-      const response = await apiRequest(endpoint, {
-        method: 'GET'
-      }, true, 5000) // Use bookings base URL with 5 second timeout
+      console.log("Fetching bookings from:", endpoint);
+      const response = await apiRequest(
+        endpoint,
+        {
+          method: "GET",
+        },
+        true,
+        5000
+      ); // Use bookings base URL with 5 second timeout
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch bookings: ${response.status}`)
+        throw new Error(`Failed to fetch bookings: ${response.status}`);
       }
 
-      const data = await response.json()
-      let bookingsList = Array.isArray(data) ? data : (data.data || data.bookings || [])
-      
+      const data = await response.json();
+      let bookingsList = Array.isArray(data)
+        ? data
+        : data.data || data.bookings || [];
+
       // Use fake data if API returns empty array
       if (!bookingsList || bookingsList.length === 0) {
-        console.warn('No bookings from API, using fake data')
-        bookingsList = fakeBookings
+        console.warn("No bookings from API, using fake data");
+        bookingsList = fakeBookings;
       }
-      
+
       // Filter bookings if needed
-      if (filter !== 'all' && filter !== 'pending') {
-        const filtered = bookingsList.filter(booking => 
-          booking.status?.toLowerCase() === filter.toLowerCase()
-        )
-        setBookings(filtered)
+      if (filter !== "all" && filter !== "pending") {
+        const filtered = bookingsList.filter(
+          (booking) => booking.status?.toLowerCase() === filter.toLowerCase()
+        );
+        setBookings(filtered);
       } else {
-        setBookings(bookingsList)
+        setBookings(bookingsList);
       }
     } catch (err) {
-      console.error('Error fetching bookings:', err)
-      if (err.message && err.message.includes('timeout')) {
-        console.warn('Request timeout after 5 seconds, using fake data')
-        setError('Backend javob bermadi (5 soniya), demo ma\'lumotlar ishlatilmoqda.')
+      console.error("Error fetching bookings:", err);
+      if (err.message && err.message.includes("timeout")) {
+        console.warn("Request timeout after 5 seconds, using fake data");
+        setError(
+          "Backend javob bermadi (5 soniya), demo ma'lumotlar ishlatilmoqda."
+        );
       } else {
-        console.warn('Using fake data due to API error')
-        setError(err.message || 'Bronlarni yuklash muvaffaqiyatsiz. Demo ma\'lumotlar ishlatilmoqda.')
+        console.warn("Using fake data due to API error");
+        setError(
+          err.message ||
+            "Bronlarni yuklash muvaffaqiyatsiz. Demo ma'lumotlar ishlatilmoqda."
+        );
       }
       // Use fake data as fallback
-      let bookingsList = fakeBookings
+      let bookingsList = fakeBookings;
       // Filter bookings if needed
-      if (filter !== 'all' && filter !== 'pending') {
-        const filtered = bookingsList.filter(booking => 
-          booking.status?.toLowerCase() === filter.toLowerCase()
-        )
-        setBookings(filtered)
+      if (filter !== "all" && filter !== "pending") {
+        const filtered = bookingsList.filter(
+          (booking) => booking.status?.toLowerCase() === filter.toLowerCase()
+        );
+        setBookings(filtered);
       } else {
-        setBookings(bookingsList)
+        setBookings(bookingsList);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleApprove = async (bookingId) => {
     try {
-      setError('')
-      setSuccess('')
-      console.log('Approving booking:', bookingId)
-      const response = await apiRequest(`${API_ENDPOINTS.bookingApprove}/${bookingId}/approve`, {
-        method: 'PATCH'
-      }, true) // Use bookings base URL
+      setError("");
+      setSuccess("");
+      console.log("Approving booking:", bookingId);
+      const response = await apiRequest(
+        `${API_ENDPOINTS.bookingApprove}/${bookingId}/approve`,
+        {
+          method: "PATCH",
+        },
+        true
+      ); // Use bookings base URL
 
       if (response.ok) {
-        setSuccess('Bron muvaffaqiyatli tasdiqlandi')
-        fetchBookings()
-        setTimeout(() => setSuccess(''), 3000)
+        setSuccess("Bron muvaffaqiyatli tasdiqlandi");
+        fetchBookings();
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        const data = await response.json()
-        setError(data.message || 'Bronni tasdiqlash muvaffaqiyatsiz')
+        const data = await response.json();
+        setError(data.message || "Bronni tasdiqlash muvaffaqiyatsiz");
       }
     } catch (err) {
-      setError(err.message || 'Bronni tasdiqlash muvaffaqiyatsiz')
+      setError(err.message || "Bronni tasdiqlash muvaffaqiyatsiz");
     }
-  }
+  };
 
   const handleReject = async (bookingId) => {
     try {
-      setError('')
-      setSuccess('')
-      console.log('Rejecting booking:', bookingId)
-      const response = await apiRequest(`${API_ENDPOINTS.bookingReject}/${bookingId}/reject`, {
-        method: 'PATCH'
-      }, true) // Use bookings base URL
+      setError("");
+      setSuccess("");
+      console.log("Rejecting booking:", bookingId);
+      const response = await apiRequest(
+        `${API_ENDPOINTS.bookingReject}/${bookingId}/reject`,
+        {
+          method: "PATCH",
+        },
+        true
+      ); // Use bookings base URL
 
       if (response.ok) {
-        setSuccess('Bron muvaffaqiyatli rad etildi')
-        fetchBookings()
-        setTimeout(() => setSuccess(''), 3000)
+        setSuccess("Bron muvaffaqiyatli rad etildi");
+        fetchBookings();
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        const data = await response.json()
-        setError(data.message || 'Bronni rad etish muvaffaqiyatsiz')
+        const data = await response.json();
+        setError(data.message || "Bronni rad etish muvaffaqiyatsiz");
       }
     } catch (err) {
-      setError(err.message || 'Bronni rad etish muvaffaqiyatsiz')
+      setError(err.message || "Bronni rad etish muvaffaqiyatsiz");
     }
-  }
+  };
 
   const handleDelete = async (bookingId) => {
     try {
-      setError('')
-      setSuccess('')
-      console.log('Deleting booking:', bookingId)
-      const response = await apiRequest(`${API_ENDPOINTS.bookings}/${bookingId}`, {
-        method: 'DELETE'
-      }, true) // Use bookings base URL
+      setError("");
+      setSuccess("");
+      console.log("Deleting booking:", bookingId);
+      const response = await apiRequest(
+        `${API_ENDPOINTS.bookings}/${bookingId}`,
+        {
+          method: "DELETE",
+        },
+        true
+      ); // Use bookings base URL
 
       if (response.ok) {
-        setSuccess('Bron muvaffaqiyatli o\'chirildi')
-        setDeleteConfirm(null)
-        fetchBookings()
-        setTimeout(() => setSuccess(''), 3000)
+        setSuccess("Bron muvaffaqiyatli o'chirildi");
+        setDeleteConfirm(null);
+        fetchBookings();
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        const data = await response.json()
-        setError(data.message || 'Bronni o\'chirish muvaffaqiyatsiz')
-        setDeleteConfirm(null)
+        const data = await response.json();
+        setError(data.message || "Bronni o'chirish muvaffaqiyatsiz");
+        setDeleteConfirm(null);
       }
     } catch (err) {
-      setError(err.message || 'Bronni o\'chirish muvaffaqiyatsiz')
-      setDeleteConfirm(null)
+      setError(err.message || "Bronni o'chirish muvaffaqiyatsiz");
+      setDeleteConfirm(null);
     }
-  }
+  };
 
   const handleStatusChange = async (bookingId, status) => {
     try {
-      setError('')
-      setSuccess('')
-      console.log('Updating booking status:', bookingId, status)
-      const response = await apiRequest(`${API_ENDPOINTS.bookingStatus}/${bookingId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status })
-      }, true) // Use bookings base URL
+      setError("");
+      setSuccess("");
+      console.log("Updating booking status:", bookingId, status);
+      const response = await apiRequest(
+        `${API_ENDPOINTS.bookingStatus}/${bookingId}/status`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ status }),
+        },
+        true
+      ); // Use bookings base URL
 
       if (response.ok) {
-        setSuccess('Bron holati muvaffaqiyatli yangilandi')
-        fetchBookings()
-        setTimeout(() => setSuccess(''), 3000)
+        setSuccess("Bron holati muvaffaqiyatli yangilandi");
+        fetchBookings();
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        const data = await response.json()
-        setError(data.message || 'Bron holatini yangilash muvaffaqiyatsiz')
+        const data = await response.json();
+        setError(data.message || "Bron holatini yangilash muvaffaqiyatsiz");
       }
     } catch (err) {
-      setError(err.message || 'Bron holatini yangilash muvaffaqiyatsiz')
+      setError(err.message || "Bron holatini yangilash muvaffaqiyatsiz");
     }
-  }
+  };
 
   const handleAddAdmin = async (e) => {
-    e.preventDefault()
-    setIsSubmittingAdmin(true)
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setIsSubmittingAdmin(true);
+    setError("");
+    setSuccess("");
 
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch(`${AUTH_BASE_URL}${API_ENDPOINTS.register}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify(adminForm),
-        mode: 'cors'
-      })
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${AUTH_BASE_URL}${API_ENDPOINTS.register}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify(adminForm),
+          mode: "cors",
+        }
+      );
 
       if (response.ok || response.status === 201) {
-        setSuccess('Admin muvaffaqiyatli qo\'shildi')
-        setShowAddAdmin(false)
+        setSuccess("Admin muvaffaqiyatli qo'shildi");
+        setShowAddAdmin(false);
         setAdminForm({
-          name: '',
-          tg_username: '',
-          phone_number: '',
-          password: '',
-          role: 'admin'
-        })
-        setTimeout(() => setSuccess(''), 3000)
+          name: "",
+          tg_username: "",
+          phone_number: "",
+          password: "",
+          role: "admin",
+        });
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        const data = await response.json()
-        setError(data.message || 'Admin qo\'shish muvaffaqiyatsiz')
+        const data = await response.json();
+        setError(data.message || "Admin qo'shish muvaffaqiyatsiz");
       }
     } catch (err) {
-      setError(err.message || 'Admin qo\'shish muvaffaqiyatsiz')
+      setError(err.message || "Admin qo'shish muvaffaqiyatsiz");
     } finally {
-      setIsSubmittingAdmin(false)
+      setIsSubmittingAdmin(false);
     }
-  }
+  };
 
   const handleAdminFormChange = (name, value) => {
     setAdminForm({
       ...adminForm,
-      [name]: value
-    })
-    if (error) setError('')
-  }
+      [name]: value,
+    });
+    if (error) setError("");
+  };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'approved':
-        return 'bg-green-100 text-green-800 border-green-300'
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-300'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+      case "approved":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "rejected":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300'
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -259,7 +290,7 @@ function Admin() {
           <p className="text-black">Yuklanmoqda...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -269,16 +300,19 @@ function Admin() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-2">Admin Boshqaruv Paneli</h1>
-              <p className="text-gray-600">Bronlarni boshqarish va nazorat qilish</p>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-2">
+                Admin Boshqaruv Paneli
+              </h1>
+              <p className="text-gray-600">
+                Bronlarni boshqarish va nazorat qilish
+              </p>
             </div>
             <div className="flex gap-3 flex-wrap">
               {isSuperAdmin() && (
                 <Button
                   onClick={() => setShowAddAdmin(true)}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
+                  className="bg-blue-600 hover:bg-blue-700 text-white">
                   + Admin qo'shish
                 </Button>
               )}
@@ -286,23 +320,20 @@ function Admin() {
                 onClick={fetchBookings}
                 size="sm"
                 variant="outlined"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
+                className="border-gray-300 text-gray-700 hover:bg-gray-50">
                 Yangilash
               </Button>
               <Button
-                onClick={() => navigate('/booking')}
+                onClick={() => navigate("/booking")}
                 size="sm"
-                className="bg-barber-olive hover:bg-barber-gold text-white"
-              >
+                className="bg-barber-olive hover:bg-barber-gold text-white">
                 Vaqt belgilash
               </Button>
               <Button
                 onClick={logout}
                 size="sm"
                 variant="outlined"
-                className="border-red-500 text-red-500 hover:bg-red-50"
-              >
+                className="border-red-500 text-red-500 hover:bg-red-50">
                 Chiqish
               </Button>
             </div>
@@ -324,12 +355,13 @@ function Admin() {
           {/* Filter and Stats */}
           <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bronlarni filtrlash</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bronlarni filtrlash
+              </label>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="w-full sm:w-auto min-w-[200px] px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-base"
-              >
+                className="w-full sm:w-auto min-w-[200px] px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-base">
                 <option value="all">Barcha bronlar ({bookings.length})</option>
                 <option value="pending">Kutilmoqda</option>
                 <option value="approved">Tasdiqlangan</option>
@@ -338,13 +370,25 @@ function Admin() {
             </div>
             <div className="flex gap-2 text-sm">
               <div className="px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
-                Kutilmoqda: {bookings.filter(b => b.status?.toLowerCase() === 'pending').length}
+                Kutilmoqda:{" "}
+                {
+                  bookings.filter((b) => b.status?.toLowerCase() === "pending")
+                    .length
+                }
               </div>
               <div className="px-3 py-2 bg-green-100 text-green-800 rounded-lg">
-                Tasdiqlangan: {bookings.filter(b => b.status?.toLowerCase() === 'approved').length}
+                Tasdiqlangan:{" "}
+                {
+                  bookings.filter((b) => b.status?.toLowerCase() === "approved")
+                    .length
+                }
               </div>
               <div className="px-3 py-2 bg-red-100 text-red-800 rounded-lg">
-                Rad etilgan: {bookings.filter(b => b.status?.toLowerCase() === 'rejected').length}
+                Rad etilgan:{" "}
+                {
+                  bookings.filter((b) => b.status?.toLowerCase() === "rejected")
+                    .length
+                }
               </div>
             </div>
           </div>
@@ -355,84 +399,127 @@ function Admin() {
               <table className="w-full">
                 <thead className="bg-barber-dark text-white">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">ID</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Mijoz</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Telefon</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Barber</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Xizmat</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Sana</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Vaqt</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Holat</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Amallar</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Mijoz
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Telefon
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Barber
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Xizmat
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Sana
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Vaqt
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Holat
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Amallar
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {bookings.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                      <td
+                        colSpan="9"
+                        className="px-4 py-8 text-center text-gray-500">
                         Bronlar topilmadi
                       </td>
                     </tr>
                   ) : (
                     bookings.map((booking) => (
-                      <tr key={booking.id || booking._id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium">{booking.id || booking._id}</td>
-                        <td className="px-4 py-3 text-sm">
-                          {booking.client?.name || booking.client_name || 'N/A'}
+                      <tr
+                        key={booking.id || booking._id}
+                        className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium">
+                          {booking.id || booking._id}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          {booking.client?.phone_number || booking.phone_number || 'N/A'}
+                          {booking.client?.name || booking.client_name || "N/A"}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          {booking.barber?.name || booking.barber_name || 'N/A'}
+                          {booking.client?.phone_number ||
+                            booking.phone_number ||
+                            "N/A"}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          {booking.service?.name || booking.service_name || 
-                           (booking.services && booking.services.length > 0 
-                             ? booking.services.map(s => s.name || s.service_name).join(', ')
-                             : 'N/A')}
+                          {booking.barber?.name || booking.barber_name || "N/A"}
                         </td>
-                        <td className="px-4 py-3 text-sm">{booking.date || 'N/A'}</td>
-                        <td className="px-4 py-3 text-sm font-medium">{booking.time || 'N/A'}</td>
                         <td className="px-4 py-3 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(booking.status)}`}>
-                            {booking.status || 'pending'}
+                          {booking.service?.name ||
+                            booking.service_name ||
+                            (booking.services && booking.services.length > 0
+                              ? booking.services
+                                  .map((s) => s.name || s.service_name)
+                                  .join(", ")
+                              : "N/A")}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          {booking.date || "N/A"}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium">
+                          {booking.time || "N/A"}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                              booking.status
+                            )}`}>
+                            {booking.status || "pending"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex flex-wrap gap-2">
-                            {booking.status?.toLowerCase() === 'pending' && (
+                            {booking.status?.toLowerCase() === "pending" && (
                               <>
                                 <Button
                                   size="sm"
-                                  onClick={() => handleApprove(booking.id || booking._id)}
-                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs"
-                                >
+                                  onClick={() =>
+                                    handleApprove(booking.id || booking._id)
+                                  }
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs">
                                   ✓ Tasdiqlash
                                 </Button>
                                 <Button
                                   size="sm"
-                                  onClick={() => handleReject(booking.id || booking._id)}
-                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
-                                >
+                                  onClick={() =>
+                                    handleReject(booking.id || booking._id)
+                                  }
+                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs">
                                   ✗ Rad etish
                                 </Button>
                               </>
                             )}
                             <select
-                              value={booking.status || 'pending'}
-                              onChange={(e) => handleStatusChange(booking.id || booking._id, e.target.value)}
-                              className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-xs"
-                            >
+                              value={booking.status || "pending"}
+                              onChange={(e) =>
+                                handleStatusChange(
+                                  booking.id || booking._id,
+                                  e.target.value
+                                )
+                              }
+                              className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-xs">
                               <option value="pending">Kutilmoqda</option>
                               <option value="approved">Tasdiqlangan</option>
                               <option value="rejected">Rad etilgan</option>
                             </select>
                             <Button
                               size="sm"
-                              onClick={() => setDeleteConfirm(booking.id || booking._id)}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs"
-                            >
+                              onClick={() =>
+                                setDeleteConfirm(booking.id || booking._id)
+                              }
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs">
                               🗑️ O'chirish
                             </Button>
                           </div>
@@ -451,7 +538,9 @@ function Admin() {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold text-black mb-4">Bronni o'chirish</h3>
+            <h3 className="text-lg font-bold text-black mb-4">
+              Bronni o'chirish
+            </h3>
             <p className="text-gray-700 mb-6">
               Bu bronni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
             </p>
@@ -459,14 +548,12 @@ function Admin() {
               <Button
                 onClick={() => setDeleteConfirm(null)}
                 variant="outlined"
-                className="border-gray-300 text-gray-700"
-              >
+                className="border-gray-300 text-gray-700">
                 Bekor qilish
               </Button>
               <Button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
+                className="bg-red-600 hover:bg-red-700 text-white">
                 O'chirish
               </Button>
             </div>
@@ -478,8 +565,10 @@ function Admin() {
       {showAddAdmin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-black mb-4">Yangi Admin Qo'shish</h3>
-            
+            <h3 className="text-lg font-bold text-black mb-4">
+              Yangi Admin Qo'shish
+            </h3>
+
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
                 {error}
@@ -491,7 +580,7 @@ function Admin() {
                 type="text"
                 name="name"
                 value={adminForm.name}
-                onChange={(e) => handleAdminFormChange('name', e.target.value)}
+                onChange={(e) => handleAdminFormChange("name", e.target.value)}
                 label="Ism"
                 placeholder="Ism kiriting"
                 required
@@ -503,7 +592,9 @@ function Admin() {
                 type="text"
                 name="tg_username"
                 value={adminForm.tg_username}
-                onChange={(e) => handleAdminFormChange('tg_username', e.target.value)}
+                onChange={(e) =>
+                  handleAdminFormChange("tg_username", e.target.value)
+                }
                 label="Telegram foydalanuvchi nomi"
                 placeholder="@username"
                 required
@@ -515,7 +606,9 @@ function Admin() {
                 type="tel"
                 name="phone_number"
                 value={adminForm.phone_number}
-                onChange={(e) => handleAdminFormChange('phone_number', e.target.value)}
+                onChange={(e) =>
+                  handleAdminFormChange("phone_number", e.target.value)
+                }
                 label="Telefon raqami"
                 placeholder="+998901234567"
                 required
@@ -527,7 +620,9 @@ function Admin() {
                 type="password"
                 name="password"
                 value={adminForm.password}
-                onChange={(e) => handleAdminFormChange('password', e.target.value)}
+                onChange={(e) =>
+                  handleAdminFormChange("password", e.target.value)
+                }
                 label="Parol"
                 placeholder="Parol kiriting"
                 required
@@ -536,13 +631,16 @@ function Admin() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rol
+                </label>
                 <select
                   value={adminForm.role}
-                  onChange={(e) => handleAdminFormChange('role', e.target.value)}
+                  onChange={(e) =>
+                    handleAdminFormChange("role", e.target.value)
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-barber-olive focus:border-barber-olive text-base"
-                  disabled={isSubmittingAdmin}
-                >
+                  disabled={isSubmittingAdmin}>
                   <option value="admin">Admin</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
@@ -552,29 +650,27 @@ function Admin() {
                 <Button
                   type="button"
                   onClick={() => {
-                    setShowAddAdmin(false)
+                    setShowAddAdmin(false);
                     setAdminForm({
-                      name: '',
-                      tg_username: '',
-                      phone_number: '',
-                      password: '',
-                      role: 'admin'
-                    })
-                    setError('')
+                      name: "",
+                      tg_username: "",
+                      phone_number: "",
+                      password: "",
+                      role: "admin",
+                    });
+                    setError("");
                   }}
                   variant="outlined"
                   className="border-gray-300 text-gray-700"
-                  disabled={isSubmittingAdmin}
-                >
+                  disabled={isSubmittingAdmin}>
                   Bekor qilish
                 </Button>
                 <Button
                   type="submit"
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   disabled={isSubmittingAdmin}
-                  loading={isSubmittingAdmin}
-                >
-                  {isSubmittingAdmin ? 'Qo\'shilmoqda...' : 'Qo\'shish'}
+                  loading={isSubmittingAdmin}>
+                  {isSubmittingAdmin ? "Qo'shilmoqda..." : "Qo'shish"}
                 </Button>
               </div>
             </form>
@@ -585,7 +681,7 @@ function Admin() {
       <Footer />
       <Analytics />
     </div>
-  )
+  );
 }
 
-export default Admin
+export default Admin;
