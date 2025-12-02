@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "name": "Super Admin",
+    "tg_username": "super_admin",
+    "phone_number": "+998901234500",
+    "role": "super_admin",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Admin User",
+    "tg_username": "admin_user",
+    "phone_number": "+998901234501",
+    "role": "admin",
+    "created_at": "2024-01-02T10:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Manager Admin",
+    "tg_username": "manager_admin",
+    "phone_number": "+998901234502",
+    "role": "admin",
+    "created_at": "2024-01-03T12:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Support Admin",
+    "tg_username": "support_admin",
+    "phone_number": "+998901234503",
+    "role": "admin",
+    "created_at": "2024-01-04T14:00:00Z"
+  }
+]
+

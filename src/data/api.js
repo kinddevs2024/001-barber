@@ -1,6 +1,6 @@
 // API configuration
 // Update this with your actual API base URL
-const BASE_HOST = "13.60.9.112";
+const BASE_HOST = "51.20.251.136";
 const BASE_PORT = "3000";
 const BASE_URL = `http://${BASE_HOST}:${BASE_PORT}`;
 

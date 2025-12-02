@@ -10,10 +10,10 @@
       { "id": 1, "name": "Soch olish" },
       { "id": 2, "name": "Soqol olish" }
     ],
-    "date": "2024-01-15",
+    "date": "2025-12-02",
     "time": "10:00",
-    "status": "pending",
-    "created_at": "2024-01-14T10:00:00Z"
+    "status": "approved",
+    "created_at": "2025-12-01T10:00:00Z"
   },
   {
     "id": 2,
@@ -23,10 +23,10 @@
     "barber_name": "Umar",
     "service_ids": [3],
     "services": [{ "id": 3, "name": "Soch va soqol" }],
-    "date": "2024-01-15",
+    "date": "2025-12-02",
     "time": "14:00",
     "status": "approved",
-    "created_at": "2024-01-14T11:00:00Z"
+    "created_at": "2025-11-01T11:00:00Z"
   },
   {
     "id": 3,
@@ -39,9 +39,649 @@
       { "id": 4, "name": "Yuz parvarishi" },
       { "id": 5, "name": "Bolalar soch olish" }
     ],
-    "date": "2024-01-16",
+    "date": "2025-12-03",
     "time": "16:00",
-    "status": "rejected",
-    "created_at": "2024-01-14T12:00:00Z"
+    "status": "approved",
+    "created_at": "2025-11-02T12:00:00Z"
+  },
+  {
+    "id": 4,
+    "client_name": "Akmal Toshmatov",
+    "phone_number": "+998901234570",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [1],
+    "services": [{ "id": 1, "name": "Soch olish" }],
+    "date": "2025-12-04",
+    "time": "09:00",
+    "status": "approved",
+    "created_at": "2025-11-03T08:30:00Z"
+  },
+  {
+    "id": 5,
+    "client_name": "Dilshod Karimov",
+    "phone_number": "+998901234571",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [2, 4],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-05",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-04T09:15:00Z"
+  },
+  {
+    "id": 6,
+    "client_name": "Farhod Rahimov",
+    "phone_number": "+998901234572",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-05",
+    "time": "13:00",
+    "status": "approved",
+    "created_at": "2025-11-04T10:00:00Z"
+  },
+  {
+    "id": 7,
+    "client_name": "Javohir Usmonov",
+    "phone_number": "+998901234573",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [6, 7],
+    "services": [
+      { "id": 6, "name": "Qirqish" },
+      { "id": 7, "name": "Royal Shave" }
+    ],
+    "date": "2025-12-06",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-05T11:30:00Z"
+  },
+  {
+    "id": 8,
+    "client_name": "Kamol Norboyev",
+    "phone_number": "+998901234574",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [5],
+    "services": [{ "id": 5, "name": "Bolalar soch olish" }],
+    "date": "2025-12-07",
+    "time": "10:00",
+    "status": "approved",
+    "created_at": "2025-11-06T08:00:00Z"
+  },
+  {
+    "id": 9,
+    "client_name": "Lazizbek Turgunov",
+    "phone_number": "+998901234575",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [8],
+    "services": [{ "id": 8, "name": "Beard Trim" }],
+    "date": "2025-12-07",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-06T09:45:00Z"
+  },
+  {
+    "id": 10,
+    "client_name": "Murodjon Salimov",
+    "phone_number": "+998901234576",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [1, 2, 4],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-08",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-11-07T12:00:00Z"
+  },
+  {
+    "id": 11,
+    "client_name": "Nodirbek Qosimov",
+    "phone_number": "+998901234577",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-09",
+    "time": "17:00",
+    "status": "approved",
+    "created_at": "2025-11-08T13:20:00Z"
+  },
+  {
+    "id": 12,
+    "client_name": "Olimjon Hakimov",
+    "phone_number": "+998901234578",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [7],
+    "services": [{ "id": 7, "name": "Royal Shave" }],
+    "date": "2025-12-10",
+    "time": "09:00",
+    "status": "approved",
+    "created_at": "2025-11-09T08:15:00Z"
+  },
+  {
+    "id": 13,
+    "client_name": "Parviz Abdullayev",
+    "phone_number": "+998901234579",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [1, 6],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 6, "name": "Qirqish" }
+    ],
+    "date": "2025-12-11",
+    "time": "12:00",
+    "status": "approved",
+    "created_at": "2025-11-10T10:30:00Z"
+  },
+  {
+    "id": 14,
+    "client_name": "Rustam Yuldashev",
+    "phone_number": "+998901234580",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [2, 8],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 8, "name": "Beard Trim" }
+    ],
+    "date": "2025-12-12",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-11T14:00:00Z"
+  },
+  {
+    "id": 15,
+    "client_name": "Sardor Zokirov",
+    "phone_number": "+998901234581",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [5],
+    "services": [{ "id": 5, "name": "Bolalar soch olish" }],
+    "date": "2025-12-12",
+    "time": "18:00",
+    "status": "approved",
+    "created_at": "2025-11-11T09:00:00Z"
+  },
+  {
+    "id": 16,
+    "client_name": "Temur Bekmurodov",
+    "phone_number": "+998901234582",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [1, 2],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" }
+    ],
+    "date": "2025-12-13",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-12T10:00:00Z"
+  },
+  {
+    "id": 17,
+    "client_name": "Ulugbek Ismoilov",
+    "phone_number": "+998901234583",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-14",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-13T11:00:00Z"
+  },
+  {
+    "id": 18,
+    "client_name": "Shohruh Mirzayev",
+    "phone_number": "+998901234584",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [4],
+    "services": [{ "id": 4, "name": "Yuz parvarishi" }],
+    "date": "2025-12-15",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-11-14T12:00:00Z"
+  },
+  {
+    "id": 19,
+    "client_name": "Bekzod Qodirov",
+    "phone_number": "+998901234585",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [1, 4],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-16",
+    "time": "10:00",
+    "status": "approved",
+    "created_at": "2025-11-15T08:30:00Z"
+  },
+  {
+    "id": 20,
+    "client_name": "Jahongir Toshmatov",
+    "phone_number": "+998901234586",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [7],
+    "services": [{ "id": 7, "name": "Royal Shave" }],
+    "date": "2025-12-17",
+    "time": "13:00",
+    "status": "approved",
+    "created_at": "2025-11-16T09:15:00Z"
+  },
+  {
+    "id": 21,
+    "client_name": "Azizbek Karimov",
+    "phone_number": "+998901234587",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [2, 8],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 8, "name": "Beard Trim" }
+    ],
+    "date": "2025-12-18",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-17T10:00:00Z"
+  },
+  {
+    "id": 22,
+    "client_name": "Davron Rahimov",
+    "phone_number": "+998901234588",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-19",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-18T11:30:00Z"
+  },
+  {
+    "id": 23,
+    "client_name": "Elyor Usmonov",
+    "phone_number": "+998901234589",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [1, 2, 4],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-20",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-19T08:00:00Z"
+  },
+  {
+    "id": 24,
+    "client_name": "Fazliddin Norboyev",
+    "phone_number": "+998901234590",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [5],
+    "services": [{ "id": 5, "name": "Bolalar soch olish" }],
+    "date": "2025-12-21",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-11-20T09:45:00Z"
+  },
+  {
+    "id": 25,
+    "client_name": "G'ayrat Turgunov",
+    "phone_number": "+998901234591",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [6, 7],
+    "services": [
+      { "id": 6, "name": "Qirqish" },
+      { "id": 7, "name": "Royal Shave" }
+    ],
+    "date": "2025-12-22",
+    "time": "10:00",
+    "status": "approved",
+    "created_at": "2025-11-21T12:00:00Z"
+  },
+  {
+    "id": 26,
+    "client_name": "Hikmat Salimov",
+    "phone_number": "+998901234592",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [1],
+    "services": [{ "id": 1, "name": "Soch olish" }],
+    "date": "2025-12-23",
+    "time": "12:00",
+    "status": "approved",
+    "created_at": "2025-11-22T13:20:00Z"
+  },
+  {
+    "id": 27,
+    "client_name": "Ibrohim Qosimov",
+    "phone_number": "+998901234593",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [2, 4],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-24",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-23T08:15:00Z"
+  },
+  {
+    "id": 28,
+    "client_name": "Jasur Hakimov",
+    "phone_number": "+998901234594",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-25",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-24T10:30:00Z"
+  },
+  {
+    "id": 29,
+    "client_name": "Komil Abdullayev",
+    "phone_number": "+998901234595",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [7],
+    "services": [{ "id": 7, "name": "Royal Shave" }],
+    "date": "2025-12-26",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-25T14:00:00Z"
+  },
+  {
+    "id": 30,
+    "client_name": "Laziz Yuldashev",
+    "phone_number": "+998901234596",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [1, 2],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" }
+    ],
+    "date": "2025-12-27",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-11-26T09:00:00Z"
+  },
+  {
+    "id": 31,
+    "client_name": "Mansur Zokirov",
+    "phone_number": "+998901234597",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [1, 2, 4, 7],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" },
+      { "id": 7, "name": "Royal Shave" }
+    ],
+    "date": "2025-12-28",
+    "time": "10:00",
+    "status": "approved",
+    "created_at": "2025-11-27T08:00:00Z"
+  },
+  {
+    "id": 32,
+    "client_name": "Nodir Toshmatov",
+    "phone_number": "+998901234598",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-29",
+    "time": "13:00",
+    "status": "approved",
+    "created_at": "2025-11-28T11:00:00Z"
+  },
+  {
+    "id": 33,
+    "client_name": "Otabek Ismoilov",
+    "phone_number": "+998901234599",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [1, 4],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-30",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-29T12:00:00Z"
+  },
+  {
+    "id": 34,
+    "client_name": "Pardayev Mirzayev",
+    "phone_number": "+998901234600",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [2, 8],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 8, "name": "Beard Trim" }
+    ],
+    "date": "2025-12-01",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-30T08:30:00Z"
+  },
+  {
+    "id": 35,
+    "client_name": "Qodir Qodirov",
+    "phone_number": "+998901234601",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-12-01",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-30T09:15:00Z"
+  },
+  {
+    "id": 36,
+    "client_name": "Ravshan Karimov",
+    "phone_number": "+998901234602",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [7],
+    "services": [{ "id": 7, "name": "Royal Shave" }],
+    "date": "2025-12-02",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-12-01T10:00:00Z"
+  },
+  {
+    "id": 37,
+    "client_name": "Siroj Rahimov",
+    "phone_number": "+998901234603",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [1, 2, 4],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-12-02",
+    "time": "18:00",
+    "status": "pending",
+    "created_at": "2025-12-01T11:30:00Z"
+  },
+  {
+    "id": 38,
+    "client_name": "Tohir Usmonov",
+    "phone_number": "+998901234604",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [5],
+    "services": [{ "id": 5, "name": "Bolalar soch olish" }],
+    "date": "2025-12-03",
+    "time": "10:00",
+    "status": "pending",
+    "created_at": "2025-12-02T08:00:00Z"
+  },
+  {
+    "id": 39,
+    "client_name": "Umid Norboyev",
+    "phone_number": "+998901234605",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [6, 7],
+    "services": [
+      { "id": 6, "name": "Qirqish" },
+      { "id": 7, "name": "Royal Shave" }
+    ],
+    "date": "2025-12-03",
+    "time": "12:00",
+    "status": "pending",
+    "created_at": "2025-12-02T09:45:00Z"
+  },
+  {
+    "id": 40,
+    "client_name": "Vohid Turgunov",
+    "phone_number": "+998901234606",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [1],
+    "services": [{ "id": 1, "name": "Soch olish" }],
+    "date": "2025-12-04",
+    "time": "14:00",
+    "status": "pending",
+    "created_at": "2025-12-03T12:00:00Z"
+  },
+  {
+    "id": 41,
+    "client_name": "Xurshid Bekmurodov",
+    "phone_number": "+998901234607",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [1, 2],
+    "services": [
+      { "id": 1, "name": "Soch olish" },
+      { "id": 2, "name": "Soqol olish" }
+    ],
+    "date": "2025-11-05",
+    "time": "10:00",
+    "status": "approved",
+    "created_at": "2025-11-04T10:00:00Z"
+  },
+  {
+    "id": 42,
+    "client_name": "Yusuf Ismoilov",
+    "phone_number": "+998901234608",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-11-10",
+    "time": "14:00",
+    "status": "approved",
+    "created_at": "2025-11-09T11:00:00Z"
+  },
+  {
+    "id": 43,
+    "client_name": "Zafar Mirzayev",
+    "phone_number": "+998901234609",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [4, 5],
+    "services": [
+      { "id": 4, "name": "Yuz parvarishi" },
+      { "id": 5, "name": "Bolalar soch olish" }
+    ],
+    "date": "2025-11-15",
+    "time": "16:00",
+    "status": "approved",
+    "created_at": "2025-11-14T12:00:00Z"
+  },
+  {
+    "id": 44,
+    "client_name": "Akbar Qodirov",
+    "phone_number": "+998901234610",
+    "barber_id": 1,
+    "barber_name": "Ahmad",
+    "service_ids": [1],
+    "services": [{ "id": 1, "name": "Soch olish" }],
+    "date": "2025-11-20",
+    "time": "09:00",
+    "status": "approved",
+    "created_at": "2025-11-19T08:30:00Z"
+  },
+  {
+    "id": 45,
+    "client_name": "Bahodir Karimov",
+    "phone_number": "+998901234611",
+    "barber_id": 2,
+    "barber_name": "Umar",
+    "service_ids": [2, 4],
+    "services": [
+      { "id": 2, "name": "Soqol olish" },
+      { "id": 4, "name": "Yuz parvarishi" }
+    ],
+    "date": "2025-11-25",
+    "time": "11:00",
+    "status": "approved",
+    "created_at": "2025-11-24T09:15:00Z"
+  },
+  {
+    "id": 46,
+    "client_name": "Davlat Rahimov",
+    "phone_number": "+998901234612",
+    "barber_id": 3,
+    "barber_name": "Ali",
+    "service_ids": [3],
+    "services": [{ "id": 3, "name": "Soch va soqol" }],
+    "date": "2025-11-28",
+    "time": "13:00",
+    "status": "approved",
+    "created_at": "2025-11-27T10:00:00Z"
+  },
+  {
+    "id": 47,
+    "client_name": "Eshmat Usmonov",
+    "phone_number": "+998901234613",
+    "barber_id": 4,
+    "barber_name": "Hasan",
+    "service_ids": [6, 7],
+    "services": [
+      { "id": 6, "name": "Qirqish" },
+      { "id": 7, "name": "Royal Shave" }
+    ],
+    "date": "2025-11-30",
+    "time": "15:00",
+    "status": "approved",
+    "created_at": "2025-11-29T11:30:00Z"
   }
 ]

@@ -324,6 +324,20 @@ function Admin() {
                 Yangilash
               </Button>
               <Button
+                onClick={() => navigate("/analytics")}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white">
+                Statistika
+              </Button>
+              {isSuperAdmin() && (
+                <Button
+                  onClick={() => navigate("/super-admin")}
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                  Super Admin
+                </Button>
+              )}
+              <Button
                 onClick={() => navigate("/booking")}
                 size="sm"
                 className="bg-barber-olive hover:bg-barber-gold text-white">

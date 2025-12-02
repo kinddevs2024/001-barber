@@ -109,12 +109,20 @@ function Header() {
           {isAuthenticated() && (
             <>
               {isAdmin() && !isSuperAdmin() && (
-                <Link
-                  to="/admin"
-                  className={`text-sm lg:text-base font-medium transition-colors ${isActive('/admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-                >
-                  Admin
-                </Link>
+                <>
+                  <Link
+                    to="/admin"
+                    className={`text-sm lg:text-base font-medium transition-colors ${isActive('/admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                  >
+                    Admin
+                  </Link>
+                  <Link
+                    to="/analytics"
+                    className={`text-sm lg:text-base font-medium transition-colors ${isActive('/analytics') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                  >
+                    Statistika
+                  </Link>
+                </>
               )}
               {isSuperAdmin() && (
                 <>
@@ -129,6 +137,12 @@ function Header() {
                     className={`text-sm lg:text-base font-medium transition-colors ${isActive('/super-admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
                   >
                     Super Admin
+                  </Link>
+                  <Link
+                    to="/analytics"
+                    className={`text-sm lg:text-base font-medium transition-colors ${isActive('/analytics') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                  >
+                    Statistika
                   </Link>
                 </>
               )}
@@ -218,15 +232,26 @@ function Header() {
               {isAuthenticated() && (
                 <>
                   {isAdmin() && !isSuperAdmin() && (
-                    <button
-                      onClick={() => {
-                        closeMobileMenu()
-                        navigate('/admin')
-                      }}
-                      className={`text-base font-medium py-2 text-left transition-colors ${isActive('/admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
-                    >
-                      Admin
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          closeMobileMenu()
+                          navigate('/admin')
+                        }}
+                        className={`text-base font-medium py-2 text-left transition-colors ${isActive('/admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                      >
+                        Admin
+                      </button>
+                      <button
+                        onClick={() => {
+                          closeMobileMenu()
+                          navigate('/analytics')
+                        }}
+                        className={`text-base font-medium py-2 text-left transition-colors ${isActive('/analytics') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                      >
+                        Statistika
+                      </button>
+                    </>
                   )}
                   {isSuperAdmin() && (
                     <>
@@ -247,6 +272,15 @@ function Header() {
                         className={`text-base font-medium py-2 text-left transition-colors ${isActive('/super-admin') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
                       >
                         Super Admin
+                      </button>
+                      <button
+                        onClick={() => {
+                          closeMobileMenu()
+                          navigate('/analytics')
+                        }}
+                        className={`text-base font-medium py-2 text-left transition-colors ${isActive('/analytics') ? 'text-barber-gold' : 'text-black hover:text-barber-gold'}`}
+                      >
+                        Statistika
                       </button>
                     </>
                   )}

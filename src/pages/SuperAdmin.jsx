@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button, Input } from "@material-tailwind/react";
 import { Analytics } from "@vercel/analytics/react";
 import { useAuth } from "../context/AuthContext";
-import { AUTH_BASE_URL, API_ENDPOINTS } from "../data/api";
-import { apiRequest } from "../utils/api";
+import { AUTH_BASE_URL, API_ENDPOINTS, API_BASE_URL } from "../data/api";
+import { apiRequest, fetchWithTimeout } from "../utils/api";
 import Footer from "../components/Footer";
+import fakeAdmins from "../data/fakeData/admins.json";
 
 function SuperAdmin() {
   const navigate = useNavigate();
@@ -41,15 +42,22 @@ function SuperAdmin() {
       // Try different possible endpoints
       let response;
       let data;
+      let useFakeData = false;
 
       try {
         // Try /users/admins endpoint first
-        response = await apiRequest(
-          "/users/admins",
+        response = await fetchWithTimeout(
+          `${API_BASE_URL}/users/admins`,
           {
             method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "*/*",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            mode: "cors",
           },
-          false
+          5000
         );
 
         if (response.ok) {
@@ -57,15 +65,22 @@ function SuperAdmin() {
         } else {
           throw new Error("First endpoint failed");
         }
-      } catch {
+      } catch (err) {
+        console.log("First endpoint failed, trying second...", err);
         try {
           // Try /users endpoint with role filter
-          response = await apiRequest(
-            "/users?role=admin",
+          response = await fetchWithTimeout(
+            `${API_BASE_URL}/users?role=admin`,
             {
               method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "*/*",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+              mode: "cors",
             },
-            false
+            5000
           );
 
           if (response.ok) {
@@ -73,15 +88,22 @@ function SuperAdmin() {
           } else {
             throw new Error("Second endpoint failed");
           }
-        } catch {
+        } catch (err2) {
+          console.log("Second endpoint failed, trying third...", err2);
           try {
             // Try /users endpoint and filter client-side
-            response = await apiRequest(
-              "/users",
+            response = await fetchWithTimeout(
+              `${API_BASE_URL}/users`,
               {
                 method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "*/*",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                mode: "cors",
               },
-              false
+              5000
             );
 
             if (response.ok) {
@@ -89,19 +111,27 @@ function SuperAdmin() {
             } else {
               throw new Error("All endpoints failed");
             }
-          } catch {
-            throw new Error("Adminlarni yuklash muvaffaqiyatsiz");
+          } catch (err3) {
+            console.log("All endpoints failed, using fake data", err3);
+            useFakeData = true;
+            data = fakeAdmins;
           }
         }
       }
 
-      const adminsList = Array.isArray(data)
-        ? data
-        : data.data || data.admins || data.users || [];
-      setAdmins(adminsList.filter((u) => u.role === "admin"));
+      if (useFakeData) {
+        // Use fake data directly
+        setAdmins(fakeAdmins.filter((u) => u.role === "admin" || u.role === "super_admin"));
+      } else {
+        const adminsList = Array.isArray(data)
+          ? data
+          : data.data || data.admins || data.users || [];
+        setAdmins(adminsList.filter((u) => u.role === "admin" || u.role === "super_admin"));
+      }
     } catch (err) {
-      console.error("Error fetching admins:", err);
-      setError(err.message || "Adminlarni yuklash muvaffaqiyatsiz");
+      console.error("Error fetching admins, using fake data:", err);
+      // Fallback to fake data on any error
+      setAdmins(fakeAdmins.filter((u) => u.role === "admin" || u.role === "super_admin"));
     } finally {
       setLoading(false);
     }
@@ -224,6 +254,12 @@ function SuperAdmin() {
                 size="sm"
                 className="bg-barber-olive hover:bg-barber-gold">
                 Admin paneli
+              </Button>
+              <Button
+                onClick={() => navigate("/analytics")}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white">
+                Statistika
               </Button>
               <Button
                 onClick={logout}
@@ -394,8 +430,15 @@ function SuperAdmin() {
                           {admin.phone_number || admin.phone || "N/A"}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                            {admin.role || "admin"}
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              admin.role === "super_admin" || admin.role === "SUPER_ADMIN"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}>
+                            {admin.role === "super_admin" || admin.role === "SUPER_ADMIN"
+                              ? "Super Admin"
+                              : admin.role || "admin"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm">

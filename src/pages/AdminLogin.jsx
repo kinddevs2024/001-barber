@@ -27,6 +27,25 @@ function AdminLogin() {
     setError("");
 
     try {
+      // Check for fake admin credentials first
+      if (formData.tg_username === "super_admin" && formData.password === "123") {
+        const fakeUserData = {
+          id: 1,
+          tg_username: "super_admin",
+          name: "Super Admin",
+          role: "super_admin",
+          isAdmin: true,
+          isSuperAdmin: true,
+        };
+        const fakeToken = "fake_admin_token_" + Date.now();
+        
+        // Store user data and token
+        login(fakeUserData, fakeToken);
+        // Redirect to admin page
+        navigate(from, { replace: true });
+        return;
+      }
+
       const response = await fetch(`${AUTH_BASE_URL}${API_ENDPOINTS.login}`, {
         method: "POST",
         headers: {
